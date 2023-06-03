@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/JourneyMainLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="30dp"
+            android:background="#FF66C4">
+
+            <TextView
+                android:id="@+id/journeyTp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="測試"
+                android:textSize="26sp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/journeyDt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:paddingBottom="10dp"
+                android:gravity="right"
+                android:text="測試"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/journeyDiary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="30dp"
+            android:maxHeight="450dp"
+            android:hint="@string/diary_hint"/>
+
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/checkmark_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom|end"
+            android:padding="4dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="25dp"
+            android:background="@drawable/circle_background"
+            android:src="@drawable/ic_checkmark" />
+        <ImageView
+            android:id="@+id/add_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:padding="4dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="90dp"
+            android:background="@drawable/circle_background"
+            android:src="@drawable/baseline_add_24" />
+        <ImageView
+            android:id="@+id/text_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="100dp"
+            android:layout_marginBottom="90dp"
+            android:background="@drawable/circle_background"
+            android:src="@drawable/text_field"
+            android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/image_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="100dp"
+            android:layout_marginBottom="25dp"
+            android:background="@drawable/circle_background"
+            android:src="@drawable/image_field"
+            android:visibility="gone"/>
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
