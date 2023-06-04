@@ -1,11 +1,13 @@
 package com.example.a00957141_hw3
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 
@@ -24,6 +26,14 @@ class JourneyActivity : AppCompatActivity() {
         val textAdd: ImageView = findViewById(R.id.text_add)
         val imageAdd: ImageView = findViewById(R.id.image_add)
         var extVisCnt: Int = 0
+
+        // 註冊 ActivityResultLauncher 用於選擇圖片
+        var imagePickerLauncher =
+            registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+                uri?.let { imageUri ->
+                    insertImageToDiary(imageUri)
+                }
+            }
 
         titles.text = journalType
         dates.text = journalDates!![0] + " ~ " + journalDates[1]
@@ -57,16 +67,19 @@ class JourneyActivity : AppCompatActivity() {
             layout.addView(editText)
         })
         imageAdd.setOnClickListener(View.OnClickListener {
-            val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
-            val imageView = ImageView(this)
-            val alertDialogFragment = NoticeDialogFragment()
-            imageView.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            )
-            imageView.setImageResource(R.drawable.baseline_rocket_24)
-            alertDialogFragment.show(supportFragmentManager, "dialog")
-            layout.addView(imageView)
+            // 啟動圖片選擇器
+            imagePickerLauncher.launch("image/*")
         })
+    }
+    // 將選擇的圖片插入到日記中
+    private fun insertImageToDiary(imageUri: Uri) {
+        val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
+        val imageView = ImageView(this)
+        imageView.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        imageView.setImageURI(imageUri)
+        layout.addView(imageView)
     }
 }
