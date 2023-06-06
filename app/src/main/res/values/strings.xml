@@ -7,4 +7,5 @@
     <string name="stdate">開始日期</string>
     <string name="eddate">結束日期</string>
     <string name="diary_hint">請在這裡輸入文字</string>
+    <string name="journey_memory">旅行的回憶</string>
 </resources>
