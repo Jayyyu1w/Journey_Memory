@@ -1,5 +1,6 @@
 package com.example.a00957141_hw3
 
+import android.Manifest
 import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -38,7 +39,7 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var addBtn: ImageView
     private lateinit var textAdd: ImageView
     private lateinit var imageAdd: ImageView
-    private lateinit var voiceAdd: ImageView # merge tana
+    private lateinit var voiceAdd: ImageView // merge tana
     private lateinit var layout: LinearLayout
     private lateinit var journalType: String
     private lateinit var journalDates: Array<String>
@@ -59,7 +60,7 @@ class JourneyActivity : AppCompatActivity() {
         addBtn = findViewById(R.id.add_icon)
         textAdd = findViewById(R.id.text_add)
         imageAdd = findViewById(R.id.image_add)
-        voiceAdd = findViewById(R.id.voice_add) # merge
+        voiceAdd = findViewById(R.id.voice_add) // merge
         layout = findViewById(R.id.JourneyMainLayout)
 
         journalType = intent.getStringExtra("journalType")!!
@@ -89,14 +90,14 @@ class JourneyActivity : AppCompatActivity() {
             if (extVisCnt == 0) {
                 textAdd.visibility = View.VISIBLE
                 imageAdd.visibility = View.VISIBLE
-                voiceAdd.visibility = View.VISIBLE # merge tana
+                voiceAdd.visibility = View.VISIBLE // merge tana
             } else {
                 textAdd.visibility = View.GONE
                 imageAdd.visibility = View.GONE
                 voiceAdd.visibility = View.GONE
             }
             extVisCnt = (extVisCnt + 1) % 2
-        }
+        })
 
         textAdd.setOnClickListener {
             val editText = EditText(this)
@@ -109,13 +110,13 @@ class JourneyActivity : AppCompatActivity() {
             layout.addView(editText)
         }
         
-        imageAdd.setOnClickListener(View.OnClickListener { # merge tana
+        imageAdd.setOnClickListener(View.OnClickListener { // merge tana
             // 啟動圖片選擇器
             imagePickerLauncher.launch("image/*")
         })
         
-        voiceAdd.setOnClickListener(View.OnClickListener { # merge tana
-            val permission = android.Manifest.permission.RECORD_AUDIO
+        voiceAdd.setOnClickListener(View.OnClickListener { // merge tana
+            val permission = Manifest.permission.RECORD_AUDIO
             if (ContextCompat.checkSelfPermission(
                     this,
                     permission
@@ -163,7 +164,7 @@ class JourneyActivity : AppCompatActivity() {
             withContext(Dispatchers.IO) {
                 diaryDao.insertItem(diaryRecord)
             }
-            setResult(Activity.RESULT_OK)
+            setResult(RESULT_OK)
             finish()
         }
     }
@@ -220,7 +221,7 @@ class JourneyActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        recordingButton.text = "开始录音"
+        recordingButton.text = "開始錄音"
         layout.addView(recordingButton)
 
         val recording = Recording(recordingButton, "", false, false, null)
