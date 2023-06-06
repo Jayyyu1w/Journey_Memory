@@ -115,6 +115,21 @@
             android:padding="4dp"
             android:src="@drawable/image_field"
             android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/voice_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="170dp"
+            android:layout_marginBottom="90dp"
+            android:background="@drawable/circle_background"
+            android:padding="4dp"
+            android:src="@drawable/voice_field"
+            android:visibility="gone" />
+
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
