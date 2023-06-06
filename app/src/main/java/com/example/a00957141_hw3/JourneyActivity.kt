@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 import java.util.*
 
@@ -130,6 +131,7 @@ class JourneyActivity : AppCompatActivity() {
         
     }
 
+    // 資料庫存取
     private fun saveDiary(journalDates: Array<String>, journalType: String, diaryDao: ItemDao) {
         val itemDataList = ArrayList<CellPreserveData>()
 
@@ -139,14 +141,18 @@ class JourneyActivity : AppCompatActivity() {
             itemData = when (view) {
                 is EditText -> {
                     val text: String? = view.text.toString()
-                    CellPreserveData(text, null)
+                    CellPreserveData(text, null, null)
                 }
                 is ImageView -> {
                     val imageData: ByteArray? = getImageDataFromImageView(i)
-                    CellPreserveData(null, imageData)
+                    CellPreserveData(null, imageData, null)
+                }
+                is Button -> {
+                    val voiceData: ByteArray? = getVoiceDataFromButton(i)
+                    CellPreserveData(null, null, voiceData)
                 }
                 else -> {
-                    CellPreserveData(null, null)
+                    CellPreserveData(null, null, null)
                 }
             }
             itemDataList.add(itemData)
@@ -167,6 +173,26 @@ class JourneyActivity : AppCompatActivity() {
             setResult(RESULT_OK)
             finish()
         }
+    }
+
+    // 錄音
+    private fun getVoiceDataFromButton(i: Int): ByteArray? {
+        val button = layout.getChildAt(i) as? Button
+        if (button != null) {
+            val recording = button.tag as? Recording
+            if (recording != null) {
+                val file = File(recording.filePath)
+                val fileInputStream = FileInputStream(file)
+                val outputStream = ByteArrayOutputStream()
+                val buffer = ByteArray(1024)
+                var length: Int
+                while (fileInputStream.read(buffer).also { length = it } != -1) {
+                    outputStream.write(buffer, 0, length)
+                }
+                return outputStream.toByteArray()
+            }
+        }
+        return null
     }
 
     private fun getImageDataFromImageView(imageViewIndex: Int): ByteArray? {
