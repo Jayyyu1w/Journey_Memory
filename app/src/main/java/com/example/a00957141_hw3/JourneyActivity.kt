@@ -1,5 +1,8 @@
 package com.example.a00957141_hw3
 
+import android.app.Activity
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
 import android.media.MediaPlayer
@@ -12,28 +15,58 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.lifecycle.lifecycleScope
+import com.example.a00957141_hw3.data.Item
+import com.example.a00957141_hw3.data.ItemDao
+import com.example.a00957141_hw3.data.ItemRoomDatabase
+import com.example.a00957141_hw3.data.CellPreserveData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.IOException
 import java.util.*
 
-
 class JourneyActivity : AppCompatActivity() {
+
+    private lateinit var titles: TextView
+    private lateinit var dates: TextView
+    private lateinit var saveBtn: ImageView
+    private lateinit var addBtn: ImageView
+    private lateinit var textAdd: ImageView
+    private lateinit var imageAdd: ImageView
+    private lateinit var voiceAdd: ImageView # merge tana
+    private lateinit var layout: LinearLayout
+    private lateinit var journalType: String
+    private lateinit var journalDates: Array<String>
+    private lateinit var database: ItemRoomDatabase
+    private lateinit var diaryDao: ItemDao
+
+    companion object {
+        const val SAVE_SUCCESS_RESULT_CODE = 1
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_journey)
 
-        val journalType = intent.getStringExtra("journalType")
-        val journalDates = intent.getStringArrayExtra("journalDates")
-        val titles: TextView = findViewById(R.id.journeyTp)
-        val dates: TextView = findViewById(R.id.journeyDt)
-        val saveBtn: ImageView = findViewById(R.id.checkmark_icon)
-        val addBtn: ImageView = findViewById(R.id.add_icon)
-        val textAdd: ImageView = findViewById(R.id.text_add)
-        val imageAdd: ImageView = findViewById(R.id.image_add)
-        val voiceAdd: ImageView = findViewById(R.id.voice_add)
-        var extVisCnt: Int = 0
+        titles = findViewById(R.id.journeyTp)
+        dates = findViewById(R.id.journeyDt)
+        saveBtn = findViewById(R.id.checkmark_icon)
+        addBtn = findViewById(R.id.add_icon)
+        textAdd = findViewById(R.id.text_add)
+        imageAdd = findViewById(R.id.image_add)
+        voiceAdd = findViewById(R.id.voice_add) # merge
+        layout = findViewById(R.id.JourneyMainLayout)
+
+        journalType = intent.getStringExtra("journalType")!!
+        journalDates = intent.getStringArrayExtra("journalDates")!!
+
+        database = ItemRoomDatabase.getDatabase(this)
+        diaryDao = database.itemDao()
 
         // 註冊 ActivityResultLauncher 用於選擇圖片
         var imagePickerLauncher =
@@ -44,44 +77,44 @@ class JourneyActivity : AppCompatActivity() {
             }
 
         titles.text = journalType
-        dates.text = journalDates!![0] + " ~ " + journalDates[1]
-        saveBtn.setOnClickListener{
-            // 觸發點擊事件時，顯示 Alert Dialog Fragment
-            val alertDialogFragment = MyAlertDialogFragment()
-            alertDialogFragment.show(supportFragmentManager, "dialog")
+        dates.text = "${journalDates[0]} ~ ${journalDates[1]}"
+
+        saveBtn.setOnClickListener {
+            saveDiary(journalDates, journalType, diaryDao)
+
         }
+
+        var extVisCnt = 0
         addBtn.setOnClickListener(View.OnClickListener {
-            val popup = PopupMenu(this@JourneyActivity, addBtn)
-            val textAdd: ImageView = findViewById(R.id.text_add)
-            val imageAdd: ImageView = findViewById(R.id.image_add)
-            val voiceAdd: ImageView = findViewById(R.id.voice_add)
-            if(extVisCnt == 0) {
+            if (extVisCnt == 0) {
                 textAdd.visibility = View.VISIBLE
                 imageAdd.visibility = View.VISIBLE
-                voiceAdd.visibility = View.VISIBLE
-            }
-            else {
+                voiceAdd.visibility = View.VISIBLE # merge tana
+            } else {
                 textAdd.visibility = View.GONE
                 imageAdd.visibility = View.GONE
                 voiceAdd.visibility = View.GONE
             }
-            ((extVisCnt + 1) % 2).also { extVisCnt = it }
-        })
-        textAdd.setOnClickListener(View.OnClickListener {
-            val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
+            extVisCnt = (extVisCnt + 1) % 2
+        }
+
+        textAdd.setOnClickListener {
             val editText = EditText(this)
-            editText.layoutParams = LinearLayout.LayoutParams(
+            val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
             )
+            editText.layoutParams = layoutParams
             editText.hint = "請在這裡輸入文字"
             layout.addView(editText)
-        })
-        imageAdd.setOnClickListener(View.OnClickListener {
+        }
+        
+        imageAdd.setOnClickListener(View.OnClickListener { # merge tana
             // 啟動圖片選擇器
             imagePickerLauncher.launch("image/*")
         })
-        voiceAdd.setOnClickListener(View.OnClickListener {
+        
+        voiceAdd.setOnClickListener(View.OnClickListener { # merge tana
             val permission = android.Manifest.permission.RECORD_AUDIO
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -93,8 +126,61 @@ class JourneyActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
             }
         })
+        
     }
 
+    private fun saveDiary(journalDates: Array<String>, journalType: String, diaryDao: ItemDao) {
+        val itemDataList = ArrayList<CellPreserveData>()
+
+        for (i in 0 until layout.childCount) {
+            val itemData: CellPreserveData
+            val view = layout.getChildAt(i)
+            itemData = when (view) {
+                is EditText -> {
+                    val text: String? = view.text.toString()
+                    CellPreserveData(text, null)
+                }
+                is ImageView -> {
+                    val imageData: ByteArray? = getImageDataFromImageView(i)
+                    CellPreserveData(null, imageData)
+                }
+                else -> {
+                    CellPreserveData(null, null)
+                }
+            }
+            itemDataList.add(itemData)
+        }
+
+        val diaryRecord = Item(
+            0,
+            journalDates[0],
+            journalDates[1],
+            titles.text.toString(),
+            itemDataList,
+            journalType
+        )
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                diaryDao.insertItem(diaryRecord)
+            }
+            setResult(Activity.RESULT_OK)
+            finish()
+        }
+    }
+
+    private fun getImageDataFromImageView(imageViewIndex: Int): ByteArray? {
+        val imageView = layout.getChildAt(imageViewIndex) as? ImageView
+        if (imageView != null) {
+            val drawable = imageView.drawable
+            if (drawable is BitmapDrawable) {
+                val bitmap = drawable.bitmap
+                val outputStream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                return outputStream.toByteArray()
+            }
+        }
+        return null
+    }
 
     private fun playRecording(recording: Recording) {
         try {
