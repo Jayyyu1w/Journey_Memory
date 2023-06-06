@@ -30,13 +30,17 @@
                     android:textSize="26sp"
                     android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/journeyDiary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:maxHeight="450dp"
-            android:hint="@string/diary_hint"/>
+                <TextView
+                    android:id="@+id/journeyDt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="8dp"
+                    android:gravity="right"
+                    android:paddingBottom="10dp"
+                    android:text="測試"
+                    android:textColor="@android:color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 

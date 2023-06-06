@@ -23,6 +23,5 @@
             </intent-filter>
         </activity>
         <activity android:name=".JourneyActivity" />
-        <activity android:name=".MemoryActivity" />
     </application>
 </manifest>
