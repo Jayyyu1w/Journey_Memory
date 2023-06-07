@@ -1,5 +1,6 @@
-package com.example.a00957141_hw3
+package com.example.Journey_Memory
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,17 +13,18 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.a00957141_hw3.data.Item
-import com.example.a00957141_hw3.data.ItemRoomDatabase
+import com.example.Journey_Memory.data.Item
+import com.example.Journey_Memory.data.ItemRoomDatabase
 import kotlinx.coroutines.launch
 
 
 class MemoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        supportActionBar?.hide() // 隱藏標題欄
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memory)
         val recyclerView = findViewById<RecyclerView>(R.id.diary_list)
-        recyclerView.layoutManager = LinearLayoutManager(this) // 设置布局管理器，例如 LinearLayoutManager
+        recyclerView.layoutManager = LinearLayoutManager(this) // 設置布局管理器，例如 LinearLayoutManager
         val adapter = DiaryAdapter() // 建立adapter instance
         recyclerView.adapter = adapter // 設置adapter
         // 使用 Room 建立資料庫
@@ -68,7 +70,18 @@ class DiaryAdapter : RecyclerView.Adapter<DiaryViewHolder>() {
     // 建立 ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DiaryViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.diary_list_item, parent, false)
+        val layoutParams = RecyclerView.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        layoutParams.setMargins(0, 0, 0, dpToPx(16, parent.context)) // 設置間距
+        view.layoutParams = layoutParams
         return DiaryViewHolder(view)
+    }
+
+    private fun dpToPx(dp: Int, context: Context): Int {
+        val scale = context.resources.displayMetrics.density
+        return (dp * scale + 0.5f).toInt()
     }
 
     // 綁定數據到 ViewHolder

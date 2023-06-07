@@ -1,6 +1,6 @@
-package com.example.a00957141_hw3.data
+package com.example.Journey_Memory.data
 
-data class CellPreserveData(val text: String?, val imageData: ByteArray?) {
+data class CellPreserveData(val text: String?, val imageData: ByteArray?, val voiceDate: ByteArray?) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

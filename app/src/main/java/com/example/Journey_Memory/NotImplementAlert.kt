@@ -1,4 +1,4 @@
-package com.example.a00957141_hw3
+package com.example.Journey_Memory
 
 import android.app.Dialog
 import android.os.Bundle

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.a00957141_hw3'
+    namespace 'com.example.Journey_Memory'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.a00957141_hw3"
+        applicationId "com.example.Journey_Memory"
         minSdk 30
         targetSdk 33
         versionCode 1
@@ -43,6 +43,7 @@ dependencies {
     implementation 'androidx.room:room-ktx:2.4.0'
     implementation "androidx.room:room-runtime:2.4.0"
     implementation 'com.google.firebase:firebase-crashlytics-buildtools:2.8.1'
+    implementation 'com.google.android.gms:play-services-maps:18.0.2'
     kapt "androidx.room:room-compiler:2.4.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'

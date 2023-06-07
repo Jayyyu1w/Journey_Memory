@@ -1,8 +1,7 @@
-package com.example.a00957141_hw3
+package com.example.Journey_Memory
 
 import android.app.Activity
 import android.app.DatePickerDialog
-import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,12 +9,9 @@ import android.view.View
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
-import com.example.a00957141_hw3.data.Item
-import com.example.a00957141_hw3.data.ItemRoomDatabase
+import com.example.Journey_Memory.data.ItemRoomDatabase
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -23,6 +19,7 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     private lateinit var journeyActivityResultLauncher: ActivityResultLauncher<Intent>
     override fun onCreate(savedInstanceState: Bundle?) {
+        supportActionBar?.hide() // 隱藏標題欄
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
