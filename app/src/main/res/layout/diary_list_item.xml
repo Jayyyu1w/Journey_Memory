@@ -9,7 +9,7 @@
         android:orientation="horizontal"
         android:background="@drawable/border_spinner"
         android:gravity="center_vertical">
-        <!-- 添加需要的视图元素 -->
+
         <TextView
             android:id="@+id/diary_item_title"
             android:layout_width="wrap_content"

@@ -1,4 +1,4 @@
-package com.example.a00957141_hw3.data
+package com.example.Journey_Memory.data
 
 import android.content.Context
 import androidx.room.Database

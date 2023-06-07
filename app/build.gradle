@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.a00957141_hw3'
+    namespace 'com.example.Journey_Memory'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.a00957141_hw3"
+        applicationId "com.example.Journey_Memory"
         minSdk 30
         targetSdk 33
         versionCode 1

@@ -1,4 +1,4 @@
-package com.example.a00957141_hw3
+package com.example.Journey_Memory
 
 import android.Manifest
 import android.app.Activity
@@ -20,10 +20,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.lifecycleScope
-import com.example.a00957141_hw3.data.Item
-import com.example.a00957141_hw3.data.ItemDao
-import com.example.a00957141_hw3.data.ItemRoomDatabase
-import com.example.a00957141_hw3.data.CellPreserveData
+import com.example.Journey_Memory.data.Item
+import com.example.Journey_Memory.data.ItemDao
+import com.example.Journey_Memory.data.ItemRoomDatabase
+import com.example.Journey_Memory.data.CellPreserveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -83,6 +83,7 @@ class JourneyActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        supportActionBar?.hide() // 隱藏標題欄
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_journey)
 

@@ -1,4 +1,4 @@
-package com.example.a00957141_hw3.data
+package com.example.Journey_Memory.data
 
 import androidx.room.TypeConverter
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken

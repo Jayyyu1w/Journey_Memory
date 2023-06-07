@@ -1,6 +1,5 @@
-package com.example.a00957141_hw3.data
+package com.example.Journey_Memory.data
 
-import android.database.Cursor
 import androidx.lifecycle.LiveData
 import androidx.room.*
 

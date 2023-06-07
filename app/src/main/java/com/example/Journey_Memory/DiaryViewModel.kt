@@ -1,11 +1,11 @@
-package com.example.a00957141_hw3
+package com.example.Journey_Memory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.a00957141_hw3.data.CellPreserveData
-import com.example.a00957141_hw3.data.Item
-import com.example.a00957141_hw3.data.ItemDao
+import com.example.Journey_Memory.data.CellPreserveData
+import com.example.Journey_Memory.data.Item
+import com.example.Journey_Memory.data.ItemDao
 import kotlinx.coroutines.launch
 
 class DiaryViewModel(private val itemDao: ItemDao) : ViewModel() {
