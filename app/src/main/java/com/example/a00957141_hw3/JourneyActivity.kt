@@ -2,6 +2,7 @@ package com.example.a00957141_hw3
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.content.pm.PackageManager
@@ -11,8 +12,10 @@ import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.view.View
 import android.widget.*
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -27,6 +30,7 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -41,11 +45,38 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var textAdd: ImageView
     private lateinit var imageAdd: ImageView
     private lateinit var voiceAdd: ImageView // merge tana
+    private lateinit var cameraAdd: ImageView // merge tana
     private lateinit var layout: LinearLayout
     private lateinit var journalType: String
     private lateinit var journalDates: Array<String>
     private lateinit var database: ItemRoomDatabase
     private lateinit var diaryDao: ItemDao
+    private val CAMERA_REQUEST_CODE = 1001
+    private val CAMERA_PERMISSION_CODE = 1002
+    private var currentPhotoPath: String = ""
+
+    // 照相
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            openCamera()
+        } else {
+            Toast.makeText(this, "没有相机权限", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val cameraLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val photoFile = File(currentPhotoPath)
+            val photoUri = Uri.fromFile(photoFile)
+            insertImageToDiary(photoUri)
+        } else {
+            Toast.makeText(this, "取消拍照", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     companion object {
         const val SAVE_SUCCESS_RESULT_CODE = 1
@@ -62,6 +93,7 @@ class JourneyActivity : AppCompatActivity() {
         textAdd = findViewById(R.id.text_add)
         imageAdd = findViewById(R.id.image_add)
         voiceAdd = findViewById(R.id.voice_add) // merge
+        cameraAdd = findViewById(R.id.camera_add) // merge
         layout = findViewById(R.id.JourneyMainLayout)
 
         journalType = intent.getStringExtra("journalType")!!
@@ -92,10 +124,12 @@ class JourneyActivity : AppCompatActivity() {
                 textAdd.visibility = View.VISIBLE
                 imageAdd.visibility = View.VISIBLE
                 voiceAdd.visibility = View.VISIBLE // merge tana
+                cameraAdd.visibility = View.VISIBLE // merge tana
             } else {
                 textAdd.visibility = View.GONE
                 imageAdd.visibility = View.GONE
                 voiceAdd.visibility = View.GONE
+                cameraAdd.visibility = View.GONE
             }
             extVisCnt = (extVisCnt + 1) % 2
         })
@@ -128,7 +162,16 @@ class JourneyActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
             }
         })
-        
+
+        cameraAdd.setOnClickListener {
+            val cameraPermission = Manifest.permission.CAMERA
+            if (ContextCompat.checkSelfPermission(this, cameraPermission) == PackageManager.PERMISSION_GRANTED) {
+                openCamera()
+            } else {
+                cameraPermissionLauncher.launch(cameraPermission)
+            }
+        }
+
     }
 
     // 資料庫存取
@@ -175,7 +218,6 @@ class JourneyActivity : AppCompatActivity() {
         }
     }
 
-    // 錄音
     private fun getVoiceDataFromButton(i: Int): ByteArray? {
         val button = layout.getChildAt(i) as? Button
         if (button != null) {
@@ -209,6 +251,39 @@ class JourneyActivity : AppCompatActivity() {
         return null
     }
 
+    // 照相功能
+    private fun openCamera() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        try {
+            val photoFile = createImageFile()
+            val photoUri = FileProvider.getUriForFile(this, "com.example.a00957141_hw3.fileprovider", photoFile)
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+            startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE)
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+            Toast.makeText(this, "无法创建图片文件", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun createImageFile(): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val imageFileName = "JPEG_${timeStamp}_"
+        val imageFile = File.createTempFile(imageFileName, ".jpg", storageDir)
+        currentPhotoPath = imageFile.absolutePath
+        return imageFile
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val imageFile = File(currentPhotoPath)
+            val imageUri = Uri.fromFile(imageFile)
+            insertImageToDiary(imageUri)
+        }
+    }
+
+    // 錄音相關功能
     private fun playRecording(recording: Recording) {
         try {
             val mediaPlayer = MediaPlayer()
@@ -278,7 +353,7 @@ class JourneyActivity : AppCompatActivity() {
 
             recording.button.text = "暫停錄音"
         } catch (e: IOException) {
-            // 处理录音异常
+            // 錄音失敗
         }
     }
 
@@ -290,7 +365,7 @@ class JourneyActivity : AppCompatActivity() {
                     recording.isPaused = true
                     recording.button.text = "播放錄音"
                 } catch (e: IllegalStateException) {
-                    // 处理暂停录音异常
+                    // 錄音失敗
                 }
             }
         }
@@ -310,7 +385,6 @@ class JourneyActivity : AppCompatActivity() {
         val fileName = "recording_$timestamp.3gp"
         return File(outputDir, fileName)
     }
-
 
     private val recordingsList: MutableList<Recording> = mutableListOf()
 
