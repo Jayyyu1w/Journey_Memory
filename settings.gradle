@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "00957141-hw3"
+rootProject.name = "Journey_Memory"
 include ':app'

@@ -2,17 +2,23 @@ package com.example.Journey_Memory
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.content.pm.PackageManager
 import android.icu.text.SimpleDateFormat
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.result.ActivityResult
@@ -27,14 +33,22 @@ import com.example.Journey_Memory.data.CellPreserveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
+import com.google.android.gms.maps.model.LatLng
 import java.util.*
+
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.AutocompleteActivity
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import java.io.*
+import java.util.*
+
 
 class JourneyActivity : AppCompatActivity() {
 
@@ -44,8 +58,9 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var addBtn: ImageView
     private lateinit var textAdd: ImageView
     private lateinit var imageAdd: ImageView
-    private lateinit var voiceAdd: ImageView // merge tana
-    private lateinit var cameraAdd: ImageView // merge tana
+    private lateinit var voiceAdd: ImageView
+    private lateinit var cameraAdd: ImageView
+    private lateinit var locationAdd: ImageView
     private lateinit var layout: LinearLayout
     private lateinit var journalType: String
     private lateinit var journalDates: Array<String>
@@ -53,7 +68,16 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var diaryDao: ItemDao
     private val CAMERA_REQUEST_CODE = 1001
     private val CAMERA_PERMISSION_CODE = 1002
+    private val LOCATION_PERMISSION_REQUEST_CODE = 1003
+    private val MAP_REQUEST_CODE = 1004
+    private val RECORD_AUDIO_PERMISSION_CODE = 1005
+    private val AUTOCOMPLETE_REQUEST_CODE = 1006
+    private val LATITUDE_LOWER_BOUND = 21.901
+    private val LONGITUDE_LOWER_BOUND = 119.132
+    private val LATITUDE_UPPER_BOUND = 25.392
+    private val LONGITUDE_UPPER_BOUND = 122.000
     private var currentPhotoPath: String = ""
+    private lateinit var placesClient: PlacesClient
 
     // 照相
     private val cameraPermissionLauncher = registerForActivityResult(
@@ -62,14 +86,24 @@ class JourneyActivity : AppCompatActivity() {
         if (isGranted) {
             openCamera()
         } else {
-            Toast.makeText(this, "没有相机权限", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "沒有相機權限", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 位置
+    private val locationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val selectedLocation = result.data?.getStringExtra("selected_location")
+            selectedLocation?.let {
+                createLocationButton(it)
+            }
         }
     }
 
     private val cameraLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val photoFile = File(currentPhotoPath)
             val photoUri = Uri.fromFile(photoFile)
             insertImageToDiary(photoUri)
@@ -93,8 +127,9 @@ class JourneyActivity : AppCompatActivity() {
         addBtn = findViewById(R.id.add_icon)
         textAdd = findViewById(R.id.text_add)
         imageAdd = findViewById(R.id.image_add)
-        voiceAdd = findViewById(R.id.voice_add) // merge
-        cameraAdd = findViewById(R.id.camera_add) // merge
+        voiceAdd = findViewById(R.id.voice_add)
+        cameraAdd = findViewById(R.id.camera_add)
+        locationAdd = findViewById(R.id.location_add)
         layout = findViewById(R.id.JourneyMainLayout)
 
         journalType = intent.getStringExtra("journalType")!!
@@ -102,6 +137,11 @@ class JourneyActivity : AppCompatActivity() {
 
         database = ItemRoomDatabase.getDatabase(this)
         diaryDao = database.itemDao()
+
+        // 初始化 Places SDK
+        val apiKey = getString(R.string.places_api_key)
+        Places.initialize(applicationContext, apiKey)
+        placesClient = Places.createClient(this)
 
         // 註冊 ActivityResultLauncher 用於選擇圖片
         var imagePickerLauncher =
@@ -124,13 +164,15 @@ class JourneyActivity : AppCompatActivity() {
             if (extVisCnt == 0) {
                 textAdd.visibility = View.VISIBLE
                 imageAdd.visibility = View.VISIBLE
-                voiceAdd.visibility = View.VISIBLE // merge tana
-                cameraAdd.visibility = View.VISIBLE // merge tana
+                voiceAdd.visibility = View.VISIBLE
+                cameraAdd.visibility = View.VISIBLE
+                locationAdd.visibility = View.VISIBLE
             } else {
                 textAdd.visibility = View.GONE
                 imageAdd.visibility = View.GONE
                 voiceAdd.visibility = View.GONE
                 cameraAdd.visibility = View.GONE
+                locationAdd.visibility = View.GONE
             }
             extVisCnt = (extVisCnt + 1) % 2
         })
@@ -173,6 +215,14 @@ class JourneyActivity : AppCompatActivity() {
             }
         }
 
+        locationAdd.setOnClickListener {
+            val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+            if (ContextCompat.checkSelfPermission(this, locationPermission) == PackageManager.PERMISSION_GRANTED) {
+                showLocationPopup()
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(locationPermission), LOCATION_PERMISSION_REQUEST_CODE)
+            }
+        }
     }
 
     // 資料庫存取
@@ -262,7 +312,7 @@ class JourneyActivity : AppCompatActivity() {
             startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE)
         } catch (ex: IOException) {
             ex.printStackTrace()
-            Toast.makeText(this, "无法创建图片文件", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "無法創建圖片", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -277,10 +327,17 @@ class JourneyActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        // 相機相關功能
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
             val imageFile = File(currentPhotoPath)
             val imageUri = Uri.fromFile(imageFile)
             insertImageToDiary(imageUri)
+        }
+        // 位置相關功能
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE && resultCode == RESULT_OK) {
+            val place = Autocomplete.getPlaceFromIntent(data!!)
+            val location = place.name
+            createLocationButton(location)
         }
     }
 
@@ -293,7 +350,7 @@ class JourneyActivity : AppCompatActivity() {
             mediaPlayer.start()
 
             mediaPlayer.setOnCompletionListener {
-                recording.button.text = "播放录音"
+                recording.button.text = "播放錄音"
             }
         } catch (e: IOException) {
             // 处理播放录音异常
@@ -401,4 +458,76 @@ class JourneyActivity : AppCompatActivity() {
         imageView.setImageURI(imageUri)
         layout.addView(imageView)
     }
+
+    private fun showLocationPopup() {
+        val popupMenu = PopupMenu(this, locationAdd)
+        popupMenu.menuInflater.inflate(R.menu.location_menu, popupMenu.menu)
+
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.auto_location -> {
+                    // 自動定位
+                    val currentLocation = getUserLocation() // 获取用户位置信息
+                    createLocationButton(currentLocation)
+                    true
+                }
+                R.id.manual_location -> {
+                    // 手動定位
+                    openPlacePicker()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        popupMenu.show()
+    }
+
+    private fun createLocationButton(location: String) {
+        val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
+        val locationButton = Button(this)
+        locationButton.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        locationButton.text = location
+        layout.addView(locationButton)
+
+        // 顯示地圖
+        locationButton.setOnClickListener {
+            if (location == "無法獲取當前位置") {
+                Toast.makeText(this, "無法獲取當前位置", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            openMapForLocation(location)
+        }
+    }
+
+    private fun openMapForLocation(location: String) {
+        val mapIntent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$location"))
+        startActivity(mapIntent)
+    }
+
+    private fun openPlacePicker() {
+        val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+        val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+            .build(this)
+        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE)
+    }
+
+    private fun getUserLocation(): String {
+        val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+        if (ContextCompat.checkSelfPermission(this, locationPermission) == PackageManager.PERMISSION_GRANTED) {
+            val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val locationProvider = LocationManager.GPS_PROVIDER
+            val location = locationManager.getLastKnownLocation(locationProvider)
+            if (location != null) {
+                val latitude = location.latitude
+                val longitude = location.longitude
+                return "($latitude, $longitude)"
+            }
+        }
+        return "無法獲取當前位置"
+    }
+
 }
