@@ -77,6 +77,7 @@ class JourneyActivity : AppCompatActivity() {
     private val LATITUDE_UPPER_BOUND = 25.392
     private val LONGITUDE_UPPER_BOUND = 122.000
     private var currentPhotoPath: String = ""
+    private var FILE_PROVIDER_AUTHORITY = "com.example.Journey_Memory.fileprovider"
     private lateinit var placesClient: PlacesClient
 
     // 照相
@@ -90,6 +91,18 @@ class JourneyActivity : AppCompatActivity() {
         }
     }
 
+    private val cameraLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val photoFile = File(currentPhotoPath)
+            val photoUri = Uri.fromFile(photoFile)
+            insertImageToDiary(photoUri)
+        } else {
+            Toast.makeText(this, "取消拍照", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     // 位置
     private val locationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -97,18 +110,6 @@ class JourneyActivity : AppCompatActivity() {
             selectedLocation?.let {
                 createLocationButton(it)
             }
-        }
-    }
-
-    private val cameraLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult ->
-        if (result.resultCode == RESULT_OK) {
-            val photoFile = File(currentPhotoPath)
-            val photoUri = Uri.fromFile(photoFile)
-            insertImageToDiary(photoUri)
-        } else {
-            Toast.makeText(this, "取消拍照", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -307,7 +308,7 @@ class JourneyActivity : AppCompatActivity() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         try {
             val photoFile = createImageFile()
-            val photoUri = FileProvider.getUriForFile(this, "com.example.a00957141_hw3.fileprovider", photoFile)
+            val photoUri = FileProvider.getUriForFile(this, FILE_PROVIDER_AUTHORITY, photoFile)
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
             startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE)
         } catch (ex: IOException) {
@@ -328,7 +329,7 @@ class JourneyActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         // 相機相關功能
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val imageFile = File(currentPhotoPath)
             val imageUri = Uri.fromFile(imageFile)
             insertImageToDiary(imageUri)
