@@ -2,12 +2,14 @@ package com.example.Journey_Memory
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.icu.text.SimpleDateFormat
 import android.location.Location
 import android.location.LocationListener
@@ -15,6 +17,7 @@ import android.location.LocationManager
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -144,13 +147,18 @@ class JourneyActivity : AppCompatActivity() {
         Places.initialize(applicationContext, apiKey)
         placesClient = Places.createClient(this)
 
+
         // 註冊 ActivityResultLauncher 用於選擇圖片
-        var imagePickerLauncher =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-                uri?.let { imageUri ->
-                    insertImageToDiary(imageUri)
+        var imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let { imageUri ->
+                val imagePath = getImagePathFromUri(imageUri)
+                if (imagePath != null) {
+                    insertImageToDiaryByPath(imagePath)
+                } else {
+                    Toast.makeText(this, "無法讀取圖片路徑", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
 
         titles.text = journalType
         dates.text = "${journalDates[0]} ~ ${journalDates[1]}"
@@ -239,7 +247,7 @@ class JourneyActivity : AppCompatActivity() {
                     CellPreserveData(text, null, null)
                 }
                 is ImageView -> {
-                    val imageData: ByteArray? = getImageDataFromImageView(i)
+                    val imageData: String? = view.tag.toString()
                     CellPreserveData(null, imageData, null)
                 }
                 is Button -> {
@@ -332,7 +340,8 @@ class JourneyActivity : AppCompatActivity() {
         if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val imageFile = File(currentPhotoPath)
             val imageUri = Uri.fromFile(imageFile)
-            insertImageToDiary(imageUri)
+            //insertImageToDiary(imageUri)
+            insertImageToDiaryByPath(currentPhotoPath)
         }
         // 位置相關功能
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -529,6 +538,49 @@ class JourneyActivity : AppCompatActivity() {
             }
         }
         return "無法獲取當前位置"
+    }
+
+    private fun insertImageToDiaryByPath(imagePath: String) {
+        val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
+        val imageView = ImageView(this)
+        imageView.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        imageView.tag = imagePath
+
+        // 通过文件路徑創建 Bitmap 对象
+        val bitmap = BitmapFactory.decodeFile(imagePath)
+        imageView.setImageBitmap(bitmap)
+
+        layout.addView(imageView)
+    }
+    // 取得圖片在相簿的路徑
+    private fun getImagePathFromUri(uri: Uri): String? {
+        var imagePath: String? = null
+        val contentResolver = applicationContext.contentResolver
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+                val fileName = it.getString(columnIndex)
+                val filePath = File(filesDir, fileName)
+                imagePath = filePath.absolutePath
+                val inputStream = contentResolver.openInputStream(uri)
+                inputStream?.use { input ->
+                    val outputStream = FileOutputStream(filePath)
+                    outputStream.use { output ->
+                        val buffer = ByteArray(4 * 1024) // 4KB buffer
+                        var bytesRead: Int
+                        while (input.read(buffer).also { bytesRead = it } != -1) {
+                            output.write(buffer, 0, bytesRead)
+                        }
+                        output.flush()
+                    }
+                }
+            }
+        }
+        return imagePath
     }
 
 }
