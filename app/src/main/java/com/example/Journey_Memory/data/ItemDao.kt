@@ -19,4 +19,7 @@ interface ItemDao {
 
     @Query("SELECT * FROM Item WHERE start_date <= :curDate AND end_date >= :curDate")
     fun getItemsByDate(curDate: String): LiveData<List<Item>>
+
+    @Query("SELECT * FROM Item WHERE id = :itemId")
+    fun getItemById(itemId: Int): LiveData<Item>
 }

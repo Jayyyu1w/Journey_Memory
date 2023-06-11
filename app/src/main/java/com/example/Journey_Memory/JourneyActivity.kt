@@ -21,6 +21,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.Editable
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -39,6 +40,7 @@ import kotlinx.coroutines.withContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.LiveData
 import com.google.android.gms.maps.model.LatLng
 import java.util.*
 
@@ -67,6 +69,7 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var layout: LinearLayout
     private lateinit var journalType: String
     private lateinit var journalDates: Array<String>
+    private lateinit var journalID: String
     private lateinit var database: ItemRoomDatabase
     private lateinit var diaryDao: ItemDao
     private val CAMERA_REQUEST_CODE = 1001
@@ -135,10 +138,9 @@ class JourneyActivity : AppCompatActivity() {
         cameraAdd = findViewById(R.id.camera_add)
         locationAdd = findViewById(R.id.location_add)
         layout = findViewById(R.id.JourneyMainLayout)
-
         journalType = intent.getStringExtra("journalType")!!
         journalDates = intent.getStringArrayExtra("journalDates")!!
-
+        journalID = intent.getStringExtra("journalID")!!
         database = ItemRoomDatabase.getDatabase(this)
         diaryDao = database.itemDao()
 
@@ -146,7 +148,6 @@ class JourneyActivity : AppCompatActivity() {
         val apiKey = getString(R.string.places_api_key)
         Places.initialize(applicationContext, apiKey)
         placesClient = Places.createClient(this)
-
 
         // 註冊 ActivityResultLauncher 用於選擇圖片
         var imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -159,7 +160,41 @@ class JourneyActivity : AppCompatActivity() {
                 }
             }
         }
+        if (journalID != "null") {
+            val itemLiveData: LiveData<Item> = diaryDao.getItemById(journalID.toInt())
+            itemLiveData.observe(this, androidx.lifecycle.Observer { item ->
+                if (item != null) {
+                    // 在这里获取最新的数据并进行相应的处理
+                    Log.d("MemoryActivity", "Item with id: $item")
+                    // 可以将item的信息显示在界面上或进行其他操作
+                    val contentList = item.content
+                    for (cellPreserveData in contentList) {
+                        val text = cellPreserveData.text
+                        val imageData = cellPreserveData.imageData
+                        val voiceData = cellPreserveData.voiceDate
+                        Log.d("MemoryActivity", "Text: $text, Image Data: $imageData, Voice Data: $voiceData")
+                        if(text!=null){
+                            val editText = EditText(this)
+                            val layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                            )
+                            editText.layoutParams = layoutParams
+                            val editableText = Editable.Factory.getInstance().newEditable(text)
+                            editText.text = editableText
+                            layout.addView(editText)
+                        }
+                        if(imageData!=null){
+                            val path=imageData.toString()
+                            insertImageToDiaryByPath(path)
+                        }
+                        if(voiceData!=null){
 
+                        }
+                    }
+                }
+            })
+        }
         titles.text = journalType
         dates.text = "${journalDates[0]} ~ ${journalDates[1]}"
 
@@ -232,6 +267,8 @@ class JourneyActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(this, arrayOf(locationPermission), LOCATION_PERMISSION_REQUEST_CODE)
             }
         }
+
+
     }
 
     // 資料庫存取
@@ -260,21 +297,38 @@ class JourneyActivity : AppCompatActivity() {
             }
             itemDataList.add(itemData)
         }
-
-        val diaryRecord = Item(
-            0,
-            journalDates[0],
-            journalDates[1],
-            titles.text.toString(),
-            itemDataList,
-            journalType
-        )
-        lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                diaryDao.insertItem(diaryRecord)
+        if(journalID!="null"){
+            val diaryRecord = Item(
+                journalID.toLong(), // 使用journalID来更新特定的项
+                journalDates[0],
+                journalDates[1],
+                titles.text.toString(),
+                itemDataList,
+                journalType
+            )
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    diaryDao.updateItem(diaryRecord) // 使用updateItem方法进行更新
+                }
+                setResult(RESULT_OK)
+                finish()
             }
-            setResult(RESULT_OK)
-            finish()
+        }else{
+            val diaryRecord = Item(
+                0,
+                journalDates[0],
+                journalDates[1],
+                titles.text.toString(),
+                itemDataList,
+                journalType
+            )
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    diaryDao.insertItem(diaryRecord)
+                }
+                setResult(RESULT_OK)
+                finish()
+            }
         }
     }
 

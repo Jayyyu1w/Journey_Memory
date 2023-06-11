@@ -1,6 +1,7 @@
 package com.example.Journey_Memory
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CalendarView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -93,6 +95,14 @@ class DiaryAdapter : RecyclerView.Adapter<DiaryViewHolder>() {
         holder.title.text = data.title
         holder.date.text = data.startDate + " ~ " + data.endDate
         holder.tags.text = data.tags
+        holder.itemView.setOnClickListener {
+            val intent = Intent(holder.itemView.context, JourneyActivity::class.java)
+            intent.putExtra("journalType", data.title.toString())
+            val journalDates = arrayOf(data.startDate, data.endDate)
+            intent.putExtra("journalDates", journalDates)
+            intent.putExtra("journalID",data.id.toString())
+            holder.itemView.context.startActivity(intent)
+        }
     }
 
     // 返回數據的數量

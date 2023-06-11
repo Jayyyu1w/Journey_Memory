@@ -81,6 +81,8 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra("journalType", spinner.selectedItem.toString())
                 val journalDates = arrayOf(stDay, edDay)
                 intent.putExtra("journalDates", journalDates)
+                val id = "null"
+                intent.putExtra("journalID",id)
                 journeyActivityResultLauncher.launch(intent)
                 lifecycleScope.launch {
                     // 在需要確認資料庫內容的地方（例如 MainActivity），使用 observe 方法觀察 LiveData
