@@ -179,6 +179,7 @@ class JourneyActivity : AppCompatActivity() {
                         val text = cellPreserveData.text
                         val imageData = cellPreserveData.imageData
                         val voiceData = cellPreserveData.voiceDate
+                        val locationData = cellPreserveData.locationData
                         Log.d("MemoryActivity", "Text: $text, Image Data: $imageData, Voice Data: $voiceData")
                         if(text!=null){
                             val editText = EditText(this)
@@ -203,6 +204,9 @@ class JourneyActivity : AppCompatActivity() {
                         }
                         if(voiceData!=null){
 
+                        }
+                        if(locationData!=null){
+                            createLocationButton(locationData.toString())
                         }
                     }
                 }
@@ -372,18 +376,22 @@ class JourneyActivity : AppCompatActivity() {
             itemData = when (view) {
                 is EditText -> {
                     val text: String? = view.text.toString()
-                    CellPreserveData(text, null, null)
+                    CellPreserveData(text, null, null,null)
                 }
                 is ImageView -> {
                     val imageData: String? = view.tag.toString()
-                    CellPreserveData(null, imageData, null)
+                    CellPreserveData(null, imageData, null,null)
                 }
                 is Button -> {
-                    val voiceData: ByteArray? = getVoiceDataFromButton(i)
-                    CellPreserveData(null, null, voiceData)
+                    val buttonTag: String? = view.tag.toString()
+                    when (buttonTag) {
+                        "recording" -> CellPreserveData(null, null, getVoiceDataFromButton(i), null)
+                        "location" -> CellPreserveData(null, null, null, view.text.toString())
+                        else -> CellPreserveData(null, null, null, null)
+                    }
                 }
                 else -> {
-                    CellPreserveData(null, null, null)
+                    CellPreserveData(null, null, null,null)
                 }
             }
             itemDataList.add(itemData)
@@ -537,11 +545,12 @@ class JourneyActivity : AppCompatActivity() {
         )
         recordingButton.text = "開始錄音"
         recordingButton.setOnLongClickListener {
-            showConfirmationDialog("確認刪除", "您確定要刪除該 Button 嗎？") {
+            showConfirmationDialog("確認刪除", "您確定要刪除該錄音嗎？") {
                 layout.removeView(recordingButton)
             }
             true
         }
+        recordingButton.tag="recording"
         layout.addView(recordingButton)
         val recording = Recording(recordingButton, "", false, false, null)
         recordingButton.setOnClickListener {
@@ -652,11 +661,12 @@ class JourneyActivity : AppCompatActivity() {
         )
         locationButton.text = location
         locationButton.setOnLongClickListener {
-            showConfirmationDialog("確認刪除", "您確定要刪除該 Button 嗎？") {
+            showConfirmationDialog("確認刪除", "您確定要刪除該位置嗎？") {
                 layout.removeView(locationButton)
             }
             true
         }
+        locationButton.tag="location"
         layout.addView(locationButton)
 
         // 顯示地圖
