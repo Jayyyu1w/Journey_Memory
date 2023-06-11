@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.CalendarView
 import android.widget.TextView
 import android.widget.Toast
@@ -25,6 +26,7 @@ class MemoryActivity : AppCompatActivity() {
         supportActionBar?.hide() // 隱藏標題欄
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memory)
+
         val recyclerView = findViewById<RecyclerView>(R.id.diary_list)
         recyclerView.layoutManager = LinearLayoutManager(this) // 設置布局管理器，例如 LinearLayoutManager
         val adapter = DiaryAdapter() // 建立adapter instance
@@ -33,6 +35,16 @@ class MemoryActivity : AppCompatActivity() {
         val database: ItemRoomDatabase by lazy { ItemRoomDatabase.getDatabase(this) }
         val diaryDao = database.itemDao()
         val calendarView = findViewById<CalendarView>(R.id.calendarView)
+
+        // 取得日曆的動畫
+        val fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.anim)
+        // 設置動畫
+        calendarView.startAnimation(fadeInAnimation)
+        recyclerView.startAnimation(fadeInAnimation)
+
+        // 請先選擇日期
+        Toast.makeText(this, "請先選擇日期", Toast.LENGTH_SHORT).show()
+
         // 設定日曆點擊事件
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             // 每次點擊日曆時，會去查詢該日期的日記
