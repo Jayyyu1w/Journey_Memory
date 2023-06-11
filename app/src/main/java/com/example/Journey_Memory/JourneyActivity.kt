@@ -24,9 +24,11 @@ import android.provider.MediaStore
 import android.text.Editable
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.lifecycleScope
@@ -149,6 +151,7 @@ class JourneyActivity : AppCompatActivity() {
         Places.initialize(applicationContext, apiKey)
         placesClient = Places.createClient(this)
 
+
         // 註冊 ActivityResultLauncher 用於選擇圖片
         var imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { imageUri ->
@@ -182,6 +185,12 @@ class JourneyActivity : AppCompatActivity() {
                             editText.layoutParams = layoutParams
                             val editableText = Editable.Factory.getInstance().newEditable(text)
                             editText.text = editableText
+                            editText.setOnLongClickListener {
+                                showConfirmationDialog("確認刪除", "您確定要刪除該文字嗎？") {
+                                    layout.removeView(editText)
+                                }
+                                true
+                            }
                             layout.addView(editText)
                         }
                         if(imageData!=null){
@@ -229,6 +238,12 @@ class JourneyActivity : AppCompatActivity() {
             )
             editText.layoutParams = layoutParams
             editText.hint = "請在這裡輸入文字"
+            editText.setOnLongClickListener {
+                showConfirmationDialog("確認刪除", "您確定要刪除該文字嗎？") {
+                    layout.removeView(editText)
+                }
+                true
+            }
             layout.addView(editText)
         }
         
@@ -445,8 +460,13 @@ class JourneyActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
         recordingButton.text = "開始錄音"
+        recordingButton.setOnLongClickListener {
+            showConfirmationDialog("確認刪除", "您確定要刪除該 Button 嗎？") {
+                layout.removeView(recordingButton)
+            }
+            true
+        }
         layout.addView(recordingButton)
-
         val recording = Recording(recordingButton, "", false, false, null)
         recordingButton.setOnClickListener {
             toggleRecordingState(recording)
@@ -555,6 +575,12 @@ class JourneyActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
         locationButton.text = location
+        locationButton.setOnLongClickListener {
+            showConfirmationDialog("確認刪除", "您確定要刪除該 Button 嗎？") {
+                layout.removeView(locationButton)
+            }
+            true
+        }
         layout.addView(locationButton)
 
         // 顯示地圖
@@ -606,7 +632,12 @@ class JourneyActivity : AppCompatActivity() {
         // 通过文件路徑創建 Bitmap 对象
         val bitmap = BitmapFactory.decodeFile(imagePath)
         imageView.setImageBitmap(bitmap)
-
+        imageView.setOnLongClickListener {
+            showConfirmationDialog("確認刪除", "您確定要刪除該圖片嗎？") {
+                layout.removeView(imageView)
+            }
+            true
+        }
         layout.addView(imageView)
     }
     // 取得圖片在相簿的路徑
@@ -635,6 +666,20 @@ class JourneyActivity : AppCompatActivity() {
             }
         }
         return imagePath
+    }
+    private fun showConfirmationDialog(title: String, message: String, onConfirm: () -> Unit) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+        builder.setMessage(message)
+        builder.setPositiveButton("確定") { dialog, _ ->
+            dialog.dismiss()
+            onConfirm.invoke()
+        }
+        builder.setNegativeButton("取消") { dialog, _ ->
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
     }
 
 }
