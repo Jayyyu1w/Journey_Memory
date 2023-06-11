@@ -1,58 +1,52 @@
 package com.example.Journey_Memory
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.app.Activity
-import android.content.ContentValues
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.icu.text.SimpleDateFormat
-import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.media.MediaPlayer
 import android.media.MediaRecorder
+import android.media.SoundPool
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.text.Editable
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
-import androidx.lifecycle.lifecycleScope
-import com.example.Journey_Memory.data.Item
-import com.example.Journey_Memory.data.ItemDao
-import com.example.Journey_Memory.data.ItemRoomDatabase
-import com.example.Journey_Memory.data.CellPreserveData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
-import com.google.android.gms.maps.model.LatLng
-import java.util.*
-
+import androidx.lifecycle.lifecycleScope
+import com.example.Journey_Memory.data.CellPreserveData
+import com.example.Journey_Memory.data.Item
+import com.example.Journey_Memory.data.ItemDao
+import com.example.Journey_Memory.data.ItemRoomDatabase
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.Autocomplete
-import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.*
 import java.util.*
 
@@ -74,6 +68,8 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var journalID: String
     private lateinit var database: ItemRoomDatabase
     private lateinit var diaryDao: ItemDao
+    private lateinit var soundPool: SoundPool
+    private var soundId: Int = 0
     private val CAMERA_REQUEST_CODE = 1001
     private val CAMERA_PERMISSION_CODE = 1002
     private val LOCATION_PERMISSION_REQUEST_CODE = 1003
@@ -146,11 +142,19 @@ class JourneyActivity : AppCompatActivity() {
         database = ItemRoomDatabase.getDatabase(this)
         diaryDao = database.itemDao()
 
+        // 取得開場動畫
+        val fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.anim)
+        // 應用開場動畫到視圖
+        layout.startAnimation(fadeInAnimation)
+
         // 初始化 Places SDK
         val apiKey = getString(R.string.places_api_key)
         Places.initialize(applicationContext, apiKey)
         placesClient = Places.createClient(this)
 
+        // 初始化音效
+        soundPool = SoundPool.Builder().setMaxStreams(1).build()
+        soundId = soundPool.load(this, R.raw.click_1, 1)
 
         // 註冊 ActivityResultLauncher 用於選擇圖片
         var imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -167,9 +171,9 @@ class JourneyActivity : AppCompatActivity() {
             val itemLiveData: LiveData<Item> = diaryDao.getItemById(journalID.toInt())
             itemLiveData.observe(this, androidx.lifecycle.Observer { item ->
                 if (item != null) {
-                    // 在这里获取最新的数据并进行相应的处理
+                    // 在這裡獲取最新的數據並進行相應的處理
                     Log.d("MemoryActivity", "Item with id: $item")
-                    // 可以将item的信息显示在界面上或进行其他操作
+                    // 可以將item的信息顯示在界面上或進行其他操作
                     val contentList = item.content
                     for (cellPreserveData in contentList) {
                         val text = cellPreserveData.text
@@ -208,29 +212,97 @@ class JourneyActivity : AppCompatActivity() {
         dates.text = "${journalDates[0]} ~ ${journalDates[1]}"
 
         saveBtn.setOnClickListener {
+            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             saveDiary(journalDates, journalType, diaryDao)
-
         }
 
         var extVisCnt = 0
-        addBtn.setOnClickListener(View.OnClickListener {
-            if (extVisCnt == 0) {
+        addBtn.setOnClickListener(object : View.OnClickListener {
+
+            private var isExpanded = false
+            override fun onClick(v: View) {
+                soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+                if (!isExpanded) {
+                    expandButtons()
+                } else {
+                    collapseButtons()
+                }
+                isExpanded = !isExpanded
+            }
+
+            private fun expandButtons() {
+                // 顯示更多按鈕並添加動畫效果
                 textAdd.visibility = View.VISIBLE
                 imageAdd.visibility = View.VISIBLE
                 voiceAdd.visibility = View.VISIBLE
                 cameraAdd.visibility = View.VISIBLE
                 locationAdd.visibility = View.VISIBLE
-            } else {
-                textAdd.visibility = View.GONE
-                imageAdd.visibility = View.GONE
-                voiceAdd.visibility = View.GONE
-                cameraAdd.visibility = View.GONE
-                locationAdd.visibility = View.GONE
+
+                // 執行動畫效果
+                animateVisibility(textAdd, View.VISIBLE)
+                animateVisibility(imageAdd, View.VISIBLE)
+                animateVisibility(voiceAdd, View.VISIBLE)
+                animateVisibility(cameraAdd, View.VISIBLE)
+                animateVisibility(locationAdd, View.VISIBLE)
             }
-            extVisCnt = (extVisCnt + 1) % 2
+
+            private fun collapseButtons() {
+                // 隱藏更多按鈕並添加動畫效果
+                animateVisibility(textAdd, View.GONE)
+                animateVisibility(imageAdd, View.GONE)
+                animateVisibility(voiceAdd, View.GONE)
+                animateVisibility(cameraAdd, View.GONE)
+                animateVisibility(locationAdd, View.GONE)
+            }
+
+            private fun animateVisibility(view: View, visibility: Int) {
+                // 創建 alpha 動畫
+                val alphaAnimator = ObjectAnimator.ofFloat(
+                    view,
+                    "alpha",
+                    if (visibility == View.VISIBLE) 0f else 1f,
+                    if (visibility == View.VISIBLE) 1f else 0f
+                )
+                alphaAnimator.duration = 300 // 設置動畫持續時間為 300 毫秒
+
+                // 創建 scale 動畫
+                val scaleAnimatorX = ObjectAnimator.ofFloat(
+                    view,
+                    "scaleX",
+                    if (visibility == View.VISIBLE) 0f else 1f,
+                    if (visibility == View.VISIBLE) 1f else 0f
+                )
+                val scaleAnimatorY = ObjectAnimator.ofFloat(
+                    view,
+                    "scaleY",
+                    if (visibility == View.VISIBLE) 0f else 1f,
+                    if (visibility == View.VISIBLE) 1f else 0f
+                )
+                scaleAnimatorX.duration = 300 // 設置動畫持續時間為 300 毫秒
+                scaleAnimatorY.duration = 300 // 設置動畫持續時間為 300 毫秒
+
+                // 創建動畫集合
+                val animatorSet = AnimatorSet()
+                animatorSet.playTogether(alphaAnimator, scaleAnimatorX, scaleAnimatorY)
+
+                // 設置動畫結束後的可見性
+                animatorSet.addListener(object : Animator.AnimatorListener {
+                    override fun onAnimationStart(animation: Animator) {}
+                    override fun onAnimationEnd(animation: Animator) {
+                        view.visibility = visibility
+                    }
+
+                    override fun onAnimationCancel(animation: Animator) {}
+                    override fun onAnimationRepeat(animation: Animator) {}
+                })
+
+                // 開始動畫
+                animatorSet.start()
+            }
         })
 
         textAdd.setOnClickListener {
+            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             val editText = EditText(this)
             val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -248,11 +320,13 @@ class JourneyActivity : AppCompatActivity() {
         }
         
         imageAdd.setOnClickListener(View.OnClickListener { // merge tana
+            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             // 啟動圖片選擇器
             imagePickerLauncher.launch("image/*")
         })
         
         voiceAdd.setOnClickListener(View.OnClickListener { // merge tana
+            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             val permission = Manifest.permission.RECORD_AUDIO
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -266,6 +340,7 @@ class JourneyActivity : AppCompatActivity() {
         })
 
         cameraAdd.setOnClickListener {
+            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             val cameraPermission = Manifest.permission.CAMERA
             if (ContextCompat.checkSelfPermission(this, cameraPermission) == PackageManager.PERMISSION_GRANTED) {
                 openCamera()
@@ -275,6 +350,7 @@ class JourneyActivity : AppCompatActivity() {
         }
 
         locationAdd.setOnClickListener {
+            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
             if (ContextCompat.checkSelfPermission(this, locationPermission) == PackageManager.PERMISSION_GRANTED) {
                 showLocationPopup()
@@ -314,7 +390,7 @@ class JourneyActivity : AppCompatActivity() {
         }
         if(journalID!="null"){
             val diaryRecord = Item(
-                journalID.toLong(), // 使用journalID来更新特定的项
+                journalID.toLong(), // 使用journalID来更新特定的項目
                 journalDates[0],
                 journalDates[1],
                 titles.text.toString(),
@@ -323,7 +399,7 @@ class JourneyActivity : AppCompatActivity() {
             )
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) {
-                    diaryDao.updateItem(diaryRecord) // 使用updateItem方法进行更新
+                    diaryDao.updateItem(diaryRecord) // 使用updateItem方法進行更新
                 }
                 setResult(RESULT_OK)
                 finish()
