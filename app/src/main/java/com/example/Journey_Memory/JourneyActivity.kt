@@ -322,13 +322,13 @@ class JourneyActivity : AppCompatActivity() {
             }
             layout.addView(editText)
         }
-        
+
         imageAdd.setOnClickListener(View.OnClickListener { // merge tana
             soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             // 啟動圖片選擇器
             imagePickerLauncher.launch("image/*")
         })
-        
+
         voiceAdd.setOnClickListener(View.OnClickListener { // merge tana
             soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             val permission = Manifest.permission.RECORD_AUDIO
@@ -397,6 +397,8 @@ class JourneyActivity : AppCompatActivity() {
             itemDataList.add(itemData)
         }
         if(journalID!="null"){
+            //Toast.makeText(this, journalDates[0], Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, journalDates[1], Toast.LENGTH_SHORT).show()
             val diaryRecord = Item(
                 journalID.toLong(), // 使用journalID来更新特定的項目
                 journalDates[0],
@@ -413,6 +415,8 @@ class JourneyActivity : AppCompatActivity() {
                 finish()
             }
         }else{
+            //Toast.makeText(this, journalDates[0], Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, journalDates[1], Toast.LENGTH_SHORT).show()
             val diaryRecord = Item(
                 0,
                 journalDates[0],

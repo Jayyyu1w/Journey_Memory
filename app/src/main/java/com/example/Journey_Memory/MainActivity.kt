@@ -116,10 +116,15 @@ class MainActivity : AppCompatActivity() {
                 mYear = year
                 mMonth = monthOfYear
                 mDay = dayOfMonth
-
+                mMonth
                 // Update EditText with selected date
-                val selectedDate: String =
-                    (mYear.toString() + "/" + (mMonth + 1).toString() + "/" + mDay.toString())
+                val selectedDate: String = String.format(
+                    Locale.getDefault(),
+                    "%04d/%02d/%02d",
+                    mYear,
+                    mMonth + 1,
+                    mDay
+                )
                 if (i == 0)
                     editTime.setText(selectedDate)
                 else

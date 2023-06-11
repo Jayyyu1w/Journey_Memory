@@ -50,7 +50,9 @@ class MemoryActivity : AppCompatActivity() {
             // 每次點擊日曆時，會去查詢該日期的日記
             // 使用協程來執行異步操作
             lifecycleScope.launch {
-                val items = diaryDao.getItemsByDate("$year/${month + 1}/$dayOfMonth")
+                val monthString = "%02d".format(month + 1)
+                val dayString = "%02d".format(dayOfMonth)
+                val items = diaryDao.getItemsByDate("$year/${monthString}/$dayString")
                 // 觀察數據變化，當數據變化時，會自動更新UI
                 // 這裡的this指的是LifecycleOwner，也就是說，當Activity或Fragment被銷毀時，這個Observer也會被自動移除
                 // 而這裡的this@MemoryActivity則是指向外層的Activity，如果用this則是lifecycleOwner的實例
