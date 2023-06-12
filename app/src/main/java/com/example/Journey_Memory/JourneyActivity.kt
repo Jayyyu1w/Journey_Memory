@@ -178,7 +178,7 @@ class JourneyActivity : AppCompatActivity() {
                     for (cellPreserveData in contentList) {
                         val text = cellPreserveData.text
                         val imageData = cellPreserveData.imageData
-                        val voiceData = cellPreserveData.voiceDate
+                        val voiceData = cellPreserveData.voiceData
                         val locationData = cellPreserveData.locationData
                         Log.d("MemoryActivity", "Text: $text, Image Data: $imageData, Voice Data: $voiceData")
                         if(text!=null){
@@ -200,10 +200,12 @@ class JourneyActivity : AppCompatActivity() {
                         }
                         if(imageData!=null){
                             val path=imageData.toString()
+                            //Toast.makeText(this, path, Toast.LENGTH_SHORT).show()
                             insertImageToDiaryByPath(path)
                         }
                         if(voiceData!=null){
-
+                            //Toast.makeText(this, voiceData.toString(), Toast.LENGTH_SHORT).show()
+                            addRecordingButton(1,voiceData.toString())
                         }
                         if(locationData!=null){
                             createLocationButton(locationData.toString())
@@ -337,7 +339,7 @@ class JourneyActivity : AppCompatActivity() {
                     permission
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                addRecordingButton()
+                addRecordingButton(0,"")
             } else {
                 ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
             }
@@ -385,9 +387,9 @@ class JourneyActivity : AppCompatActivity() {
                 is Button -> {
                     val buttonTag: String? = view.tag.toString()
                     when (buttonTag) {
-                        "recording" -> CellPreserveData(null, null, getVoiceDataFromButton(i), null)
+                        //"recording" -> CellPreserveData(null, null, getVoiceDataFromButton(i), null)
                         "location" -> CellPreserveData(null, null, null, view.text.toString())
-                        else -> CellPreserveData(null, null, null, null)
+                        else -> CellPreserveData(null, null, getVoiceDataPathFromButton(i) , null)
                     }
                 }
                 else -> {
@@ -451,6 +453,18 @@ class JourneyActivity : AppCompatActivity() {
                 return outputStream.toByteArray()
             }
         }
+        return null
+    }
+    private fun getVoiceDataPathFromButton(i: Int): String? {
+        val button = layout.getChildAt(i) as? Button
+        if (button != null) {
+            val recording = button.tag as? Recording
+            if (recording != null) {
+                //Toast.makeText(this, recording.filePath.toString(), Toast.LENGTH_SHORT).show()
+                return recording.filePath
+            }
+        }
+        //Toast.makeText(this, "error", Toast.LENGTH_SHORT).show()
         return null
     }
 
@@ -540,27 +554,35 @@ class JourneyActivity : AppCompatActivity() {
         }
     }
 
-    private fun addRecordingButton() {
+    private fun addRecordingButton(state:Int,path:String) {
         val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
         val recordingButton = Button(this)
         recordingButton.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        recordingButton.text = "開始錄音"
+        if(state==0){
+            recordingButton.text = "開始錄音"
+        }else{
+            recordingButton.text = "播放錄音"
+        }
         recordingButton.setOnLongClickListener {
             showConfirmationDialog("確認刪除", "您確定要刪除該錄音嗎？") {
                 layout.removeView(recordingButton)
             }
             true
         }
-        recordingButton.tag="recording"
+        //recordingButton.tag="recording"
         layout.addView(recordingButton)
-        val recording = Recording(recordingButton, "", false, false, null)
+        val recording = Recording(recordingButton, path, false, false, null)
+        if(state==1){
+            recording.isRecording=true
+            recording.isPaused=true
+        }
         recordingButton.setOnClickListener {
             toggleRecordingState(recording)
         }
-
+        recordingButton.tag = recording
         recordingsList.add(recording)
     }
 
