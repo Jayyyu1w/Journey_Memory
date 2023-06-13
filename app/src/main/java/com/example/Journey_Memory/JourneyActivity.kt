@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.icu.text.SimpleDateFormat
 import android.location.LocationManager
@@ -33,6 +34,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import com.example.Journey_Memory.data.CellPreserveData
@@ -465,7 +467,7 @@ class JourneyActivity : AppCompatActivity() {
         return null
     }
     private fun getVoiceDataPathFromButton(i: Int): String? {
-        val button = layout.getChildAt(i) as? Button
+        val button = layout.getChildAt(i) as? ImageButton
         if (button != null) {
             val recording = button.tag as? Recording
             if (recording != null) {
@@ -540,15 +542,14 @@ class JourneyActivity : AppCompatActivity() {
             mediaPlayer.start()
 
             mediaPlayer.setOnCompletionListener {
-                recording.button.text = "播放錄音"
+//                recording.button.text = "播放錄音"
+                recording.button.setImageResource(R.drawable.play)
             }
+
+            recording.button.setImageResource(R.drawable.pause) // 播放中
         } catch (e: IOException) {
-            // 处理播放录音异常
-            // 例如显示错误信息、记录日志等
             print(e)
         } catch (e: IllegalStateException) {
-            // 处理播放录音异常
-            // 例如显示错误信息、记录日志等
             print(e)
         }
     }
@@ -565,15 +566,17 @@ class JourneyActivity : AppCompatActivity() {
 
     private fun addRecordingButton(state:Int,path:String) {
         val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
-        val recordingButton = Button(this)
+        val recordingButton = ImageButton(this)
         recordingButton.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
         if(state==0){
-            recordingButton.text = "開始錄音"
+//            recordingButton.text = "開始錄音"
+            recordingButton.setImageResource(R.drawable.voice)
         }else{
-            recordingButton.text = "播放錄音"
+//            recordingButton.text = "播放錄音"
+            recordingButton.setImageResource(R.drawable.play)
         }
         recordingButton.setOnLongClickListener {
             showConfirmationDialog("確認刪除", "您確定要刪除該錄音嗎？") {
@@ -582,6 +585,9 @@ class JourneyActivity : AppCompatActivity() {
             true
         }
         //recordingButton.tag="recording"
+        // 設置錄音按鈕的樣式
+        recordingButton.setBackgroundResource(R.drawable.button_background_with_blue)
+
         layout.addView(recordingButton)
         val recording = Recording(recordingButton, path, false, false, null)
         if(state==1){
@@ -613,7 +619,8 @@ class JourneyActivity : AppCompatActivity() {
             recording.isRecording = true
             recording.isPaused = false
 
-            recording.button.text = "暫停錄音"
+//            recording.button.text = "暫停錄音"
+            recording.button.setImageResource(R.drawable.voice_setting)
         } catch (e: IOException) {
             // 錄音失敗
         }
@@ -625,7 +632,10 @@ class JourneyActivity : AppCompatActivity() {
                 try {
                     recording.mediaRecorder!!.stop()
                     recording.isPaused = true
-                    recording.button.text = "播放錄音"
+//                    recording.button.text = "播放錄音"
+                    recording.button.setImageResource(R.drawable.play)
+                } catch (e: RuntimeException) {
+                    // 錄音失敗
                 } catch (e: IllegalStateException) {
                     // 錄音失敗
                 }
@@ -634,7 +644,7 @@ class JourneyActivity : AppCompatActivity() {
     }
 
     data class Recording(
-        val button: Button,
+        val button: ImageButton,
         var filePath: String = "",
         var isRecording: Boolean = false,
         var isPaused: Boolean = false,
@@ -690,6 +700,11 @@ class JourneyActivity : AppCompatActivity() {
     private fun createLocationButton(location: String) {
         val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
         val locationButton = Button(this)
+        // 設置按鈕的樣式
+        locationButton.setBackgroundResource(R.drawable.button_background_with_blue)
+        locationButton.setTextColor(Color.WHITE)
+        locationButton.stateListAnimator = null
+
         locationButton.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
