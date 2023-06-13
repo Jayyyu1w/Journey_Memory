@@ -2,6 +2,7 @@ package com.example.Journey_Memory
 
 import android.content.Context
 import android.content.Intent
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,6 +20,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.Journey_Memory.data.Item
 import com.example.Journey_Memory.data.ItemRoomDatabase
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.reflect.typeOf
 
 
 class MemoryActivity : AppCompatActivity() {
@@ -45,6 +48,22 @@ class MemoryActivity : AppCompatActivity() {
         // 請先選擇日期
         Toast.makeText(this, "請先選擇日期", Toast.LENGTH_SHORT).show()
 
+        // 取得當前日期
+        val currentDate = getCurrentDate()
+
+        // 查詢當天的資料庫紀錄
+        lifecycleScope.launch {
+            val items = diaryDao.getItemsByDate(currentDate)
+            // 觀察數據變化，當數據變化時，會自動更新UI
+            items.observe(this@MemoryActivity,
+                Observer<List<Item?>?> { items ->
+                    // 在這裡獲取最新的數據並進行相應的處理
+                    val itemList: List<Item> = items.filterNotNull()
+                    Log.d("MemoryActivity", "itemList: $itemList")
+                    adapter.setData(itemList)
+                })
+        }
+
         // 設定日曆點擊事件
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             // 每次點擊日曆時，會去查詢該日期的日記
@@ -65,6 +84,13 @@ class MemoryActivity : AppCompatActivity() {
                     })
             }
         }
+    }
+    private fun getCurrentDate(): String {
+        val currentDate = Date()
+        val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+        println("Current Date: ${dateFormat.format(currentDate)}")
+        //println(dateFormat)
+        return dateFormat.format(currentDate)
     }
 }
 
