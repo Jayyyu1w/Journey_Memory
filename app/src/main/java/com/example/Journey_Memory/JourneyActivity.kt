@@ -154,7 +154,7 @@ class JourneyActivity : AppCompatActivity() {
 
         // 初始化音效
         soundPool = SoundPool.Builder().setMaxStreams(1).build()
-        soundId = soundPool.load(this, R.raw.click_1, 1)
+        soundId = soundPool.load(this, R.raw.click_soft, 1)
 
         // 註冊 ActivityResultLauncher 用於選擇圖片
         var imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -218,7 +218,6 @@ class JourneyActivity : AppCompatActivity() {
         dates.text = "${journalDates[0]} ~ ${journalDates[1]}"
 
         saveBtn.setOnClickListener {
-            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             saveDiary(journalDates, journalType, diaryDao)
         }
 
