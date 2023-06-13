@@ -69,7 +69,11 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var database: ItemRoomDatabase
     private lateinit var diaryDao: ItemDao
     private lateinit var soundPool: SoundPool
-    private var soundId: Int = 0
+    private var clickErrorId: Int = 0
+    private var clickCoolId: Int = 0
+    private var clickGameId: Int = 0
+    private var clickSelctId: Int = 0
+    private var clickSoftId: Int = 0
     private val CAMERA_REQUEST_CODE = 1001
     private val CAMERA_PERMISSION_CODE = 1002
     private val LOCATION_PERMISSION_REQUEST_CODE = 1003
@@ -154,15 +158,21 @@ class JourneyActivity : AppCompatActivity() {
 
         // 初始化音效
         soundPool = SoundPool.Builder().setMaxStreams(1).build()
-        soundId = soundPool.load(this, R.raw.click_soft, 1)
+        clickErrorId = soundPool.load(this, R.raw.click_error, 1)
+        clickCoolId = soundPool.load(this, R.raw.click_cool, 1)
+        clickGameId = soundPool.load(this, R.raw.click_game, 1)
+        clickSelctId = soundPool.load(this, R.raw.click_select, 1)
+        clickSoftId = soundPool.load(this, R.raw.click_soft, 1)
 
         // 註冊 ActivityResultLauncher 用於選擇圖片
         var imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { imageUri ->
                 val imagePath = getImagePathFromUri(imageUri)
                 if (imagePath != null) {
+                    soundPool.play(clickSelctId, 1.0f, 1.0f, 0, 0, 1.0f)
                     insertImageToDiaryByPath(imagePath)
                 } else {
+                    soundPool.play(clickErrorId, 1.0f, 1.0f, 0, 0, 1.0f)
                     Toast.makeText(this, "無法讀取圖片路徑", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -226,7 +236,7 @@ class JourneyActivity : AppCompatActivity() {
 
             private var isExpanded = false
             override fun onClick(v: View) {
-                soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+                soundPool.play(clickSoftId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
                 if (!isExpanded) {
                     expandButtons()
                 } else {
@@ -307,7 +317,7 @@ class JourneyActivity : AppCompatActivity() {
         })
 
         textAdd.setOnClickListener {
-            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             val editText = EditText(this)
             val layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -325,13 +335,13 @@ class JourneyActivity : AppCompatActivity() {
         }
 
         imageAdd.setOnClickListener(View.OnClickListener { // merge tana
-            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             // 啟動圖片選擇器
             imagePickerLauncher.launch("image/*")
         })
 
         voiceAdd.setOnClickListener(View.OnClickListener { // merge tana
-            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             val permission = Manifest.permission.RECORD_AUDIO
             if (ContextCompat.checkSelfPermission(
                     this,
@@ -345,7 +355,7 @@ class JourneyActivity : AppCompatActivity() {
         })
 
         cameraAdd.setOnClickListener {
-            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             val cameraPermission = Manifest.permission.CAMERA
             if (ContextCompat.checkSelfPermission(this, cameraPermission) == PackageManager.PERMISSION_GRANTED) {
                 openCamera()
@@ -355,7 +365,7 @@ class JourneyActivity : AppCompatActivity() {
         }
 
         locationAdd.setOnClickListener {
-            soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
             if (ContextCompat.checkSelfPermission(this, locationPermission) == PackageManager.PERMISSION_GRANTED) {
                 showLocationPopup()
