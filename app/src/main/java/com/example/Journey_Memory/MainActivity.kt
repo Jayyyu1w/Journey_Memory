@@ -3,6 +3,7 @@ package com.example.Journey_Memory
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.media.SoundPool
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -18,6 +19,12 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var journeyActivityResultLauncher: ActivityResultLauncher<Intent>
+    private lateinit var soundPool: SoundPool
+    private var clickErrorId: Int = 0
+    private var clickCoolId: Int = 0
+    private var clickGameId: Int = 0
+    private var clickSelctId: Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         supportActionBar?.hide() // 隱藏標題欄
         super.onCreate(savedInstanceState)
@@ -37,6 +44,14 @@ class MainActivity : AppCompatActivity() {
             ArrayAdapter<Any?>(applicationContext, R.layout.spinner_textset, opts)
         val database: ItemRoomDatabase by lazy { ItemRoomDatabase.getDatabase(this) }
         val diaryDao = database.itemDao()
+
+        // 初始化音效
+        soundPool = SoundPool.Builder().setMaxStreams(1).build()
+        clickErrorId = soundPool.load(this, R.raw.click_error, 1)
+        clickCoolId = soundPool.load(this, R.raw.click_cool, 1)
+        clickGameId = soundPool.load(this, R.raw.click_game, 1)
+        clickSelctId = soundPool.load(this, R.raw.click_select, 1)
+
         adapter.setDropDownViewResource(R.layout.spinner_textset)
         spinner.adapter = adapter
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -59,14 +74,22 @@ class MainActivity : AppCompatActivity() {
         // 初始化 ActivityResultLauncher
         journeyActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
+                soundPool.play(clickGameId, 1.0f, 1.0f, 1, 0, 1.0f) // 成功音效
                 // 儲存成功的處理邏輯，顯示儲存成功的提示
                 Toast.makeText(this, "儲存成功", Toast.LENGTH_SHORT).show()
             }
         }
 
-        buttonStTime.setOnClickListener(View.OnClickListener { showDatePickerDialog(0, editStTime) })
-        buttonEdTime.setOnClickListener(View.OnClickListener { showDatePickerDialog(1, editEdTime) })
+        buttonStTime.setOnClickListener(View.OnClickListener {
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 點擊音效
+            showDatePickerDialog(0, editStTime)
+        })
+        buttonEdTime.setOnClickListener(View.OnClickListener {
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 點擊音效
+            showDatePickerDialog(1, editEdTime)
+        })
         buttonMemory.setOnClickListener(View.OnClickListener {
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 點擊音效
             val intent = Intent(this, MemoryActivity::class.java)
             startActivity(intent)
         })
@@ -74,9 +97,11 @@ class MainActivity : AppCompatActivity() {
             stDay = editStTime.text.toString()
             edDay = editEdTime.text.toString()
             if(stDay == "" || edDay == ""){
+                soundPool.play(clickErrorId, 1.0f, 1.0f, 1, 0, 1.0f) // 錯誤音效
                 Toast.makeText(applicationContext, "請選擇日期", Toast.LENGTH_SHORT).show()
                 return@OnClickListener
             }else{
+                soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 點擊音效
                 val intent = Intent(this@MainActivity, JourneyActivity::class.java)
                 intent.putExtra("journalType", spinner.selectedItem.toString())
                 val journalDates = arrayOf(stDay, edDay)
@@ -129,6 +154,7 @@ class MainActivity : AppCompatActivity() {
                     editTime.setText(selectedDate)
                 else
                     editTime.setText(selectedDate)
+                soundPool.play(clickSelctId, 1.0f, 1.0f, 1, 0, 1.0f) // 點擊音效
             }, mYear, mMonth, mDay
         )
         datePickerDialog.show()
