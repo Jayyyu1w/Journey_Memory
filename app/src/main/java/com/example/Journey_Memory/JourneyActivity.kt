@@ -467,7 +467,7 @@ class JourneyActivity : AppCompatActivity() {
         return null
     }
     private fun getVoiceDataPathFromButton(i: Int): String? {
-        val button = layout.getChildAt(i) as? Button
+        val button = layout.getChildAt(i) as? ImageButton
         if (button != null) {
             val recording = button.tag as? Recording
             if (recording != null) {
