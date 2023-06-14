@@ -128,21 +128,21 @@ class MainActivity : AppCompatActivity() {
         buttonShare.setOnClickListener {
             soundPool.play(clickSelctId, 1.0f, 1.0f, 1, 0, 1.0f) // 播放点击音效
 
-            // 创建分享文本
+            // 分享的文本
             val shareText = """
                 我發現了一個很棒的app，快來下載吧！
                 
                 JoirneyMemory
                 一個可以記錄旅遊、美食、記事回憶的app
-                下载連結：
+                下载連結：https://raw.githubusercontent.com/Jayyyu1w/Journey_Memory/main/JourneyMemory.apk
                 """.trimIndent()
 
-            // 创建分享意图
+            // 創建分享
             val shareIntent = Intent(Intent.ACTION_SEND)
             shareIntent.type = "text/plain"
             shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
 
-            // 启动分享操作
+            // 開啟分享
             startActivity(Intent.createChooser(shareIntent, "分享此APP給好友"))
         }
     }
