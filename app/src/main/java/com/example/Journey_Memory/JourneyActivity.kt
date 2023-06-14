@@ -682,6 +682,7 @@ class JourneyActivity : AppCompatActivity() {
         layout.addView(imageView)
     }
 
+    // 定位相關功能
     private fun showLocationPopup() {
         val popupMenu = PopupMenu(this, locationAdd)
         popupMenu.menuInflater.inflate(R.menu.location_menu, popupMenu.menu)
@@ -762,6 +763,7 @@ class JourneyActivity : AppCompatActivity() {
                 val locationProvider = LocationManager.NETWORK_PROVIDER
                 val location = locationManager.getLastKnownLocation(locationProvider)
                 if (location != null) {
+                    soundPool.play(clickSelctId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
                     val latitude = location.latitude
                     val longitude = location.longitude
                     return "($latitude, $longitude)"
@@ -774,6 +776,7 @@ class JourneyActivity : AppCompatActivity() {
                 val locationProvider = LocationManager.GPS_PROVIDER
                 val location = locationManager.getLastKnownLocation(locationProvider)
                 if (location != null) {
+                    soundPool.play(clickSelctId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
                     val latitude = location.latitude
                     val longitude = location.longitude
                     return "($latitude, $longitude)"
@@ -789,14 +792,20 @@ class JourneyActivity : AppCompatActivity() {
     private fun insertImageToDiaryByPath(imagePath: String) {
         val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
         val imageView = ImageView(this)
-        imageView.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
+
+        // 設置圖片的縮放類型
+        imageView.scaleType = ImageView.ScaleType.FIT_XY
+
+        // 使用手機的寬度作為圖片的寬度
+        val screenWidth = resources.displayMetrics.widthPixels
+        val bitmap = BitmapFactory.decodeFile(imagePath)
+        val scaledHeight = (bitmap.height.toFloat() / bitmap.width.toFloat() * screenWidth).toInt()
+
+        // 設置圖片的寬高
+        val layoutParams = LinearLayout.LayoutParams(screenWidth, scaledHeight)
+        imageView.layoutParams = layoutParams
         imageView.tag = imagePath
 
-        // 通过文件路徑創建 Bitmap 对象
-        val bitmap = BitmapFactory.decodeFile(imagePath)
         imageView.setImageBitmap(bitmap)
         imageView.setOnLongClickListener {
             showConfirmationDialog("確認刪除", "您確定要刪除該圖片嗎？") {
@@ -806,6 +815,7 @@ class JourneyActivity : AppCompatActivity() {
         }
         layout.addView(imageView)
     }
+
     // 取得圖片在相簿的路徑
     private fun getImagePathFromUri(uri: Uri): String? {
         var imagePath: String? = null
