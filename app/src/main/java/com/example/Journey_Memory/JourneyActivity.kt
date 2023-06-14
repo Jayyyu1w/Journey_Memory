@@ -65,6 +65,7 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var voiceAdd: ImageView
     private lateinit var cameraAdd: ImageView
     private lateinit var locationAdd: ImageView
+    private lateinit var spaceAdd: ImageView
     private lateinit var layout: LinearLayout
     private lateinit var journalType: String
     private lateinit var journalDates: Array<String>
@@ -142,6 +143,7 @@ class JourneyActivity : AppCompatActivity() {
         voiceAdd = findViewById(R.id.voice_add)
         cameraAdd = findViewById(R.id.camera_add)
         locationAdd = findViewById(R.id.location_add)
+        spaceAdd = findViewById(R.id.space_add)
         layout = findViewById(R.id.JourneyMainLayout)
         journalType = intent.getStringExtra("journalType")!!
         journalDates = intent.getStringArrayExtra("journalDates")!!
@@ -196,6 +198,7 @@ class JourneyActivity : AppCompatActivity() {
                         val imageData = cellPreserveData.imageData
                         val voiceData = cellPreserveData.voiceData
                         val locationData = cellPreserveData.locationData
+                        val spaceData = cellPreserveData.spaceData
                         Log.d("MemoryActivity", "Text: $text, Image Data: $imageData, Voice Data: $voiceData")
                         if(text!=null){
                             val editText = EditText(this)
@@ -225,6 +228,9 @@ class JourneyActivity : AppCompatActivity() {
                         }
                         if(locationData!=null){
                             createLocationButton(locationData.toString())
+                        }
+                        if(spaceData!=null){
+                            addSpace(100)
                         }
                     }
                 }
@@ -258,6 +264,7 @@ class JourneyActivity : AppCompatActivity() {
                 voiceAdd.visibility = View.VISIBLE
                 cameraAdd.visibility = View.VISIBLE
                 locationAdd.visibility = View.VISIBLE
+                spaceAdd.visibility = View.VISIBLE
 
                 // 執行動畫效果
                 animateVisibility(textAdd, View.VISIBLE)
@@ -265,6 +272,7 @@ class JourneyActivity : AppCompatActivity() {
                 animateVisibility(voiceAdd, View.VISIBLE)
                 animateVisibility(cameraAdd, View.VISIBLE)
                 animateVisibility(locationAdd, View.VISIBLE)
+                animateVisibility(spaceAdd, View.VISIBLE)
             }
 
             private fun collapseButtons() {
@@ -274,6 +282,7 @@ class JourneyActivity : AppCompatActivity() {
                 animateVisibility(voiceAdd, View.GONE)
                 animateVisibility(cameraAdd, View.GONE)
                 animateVisibility(locationAdd, View.GONE)
+                animateVisibility(spaceAdd, View.GONE)
             }
 
             private fun animateVisibility(view: View, visibility: Int) {
@@ -380,6 +389,11 @@ class JourneyActivity : AppCompatActivity() {
             }
         }
 
+        spaceAdd.setOnClickListener(View.OnClickListener {
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+            addSpace(100)
+        })
+
 
     }
 
@@ -391,27 +405,30 @@ class JourneyActivity : AppCompatActivity() {
             val itemData: CellPreserveData
             val view = layout.getChildAt(i)
             if(view is ImageButton){
-                itemData = CellPreserveData(null,null,getVoiceDataPathFromButton(i),null)
+                itemData = CellPreserveData(null,null,getVoiceDataPathFromButton(i),null, null)
             }else{
                 itemData = when (view) {
                     is EditText -> {
                         val text: String? = view.text.toString()
-                        CellPreserveData(text, null, null,null)
+                        CellPreserveData(text, null, null,null, null)
                     }
                     is ImageView -> {
                         val imageData: String? = view.tag.toString()
-                        CellPreserveData(null, imageData, null,null)
+                        CellPreserveData(null, imageData, null,null, null)
                     }
                     is Button -> {
                         val buttonTag: String? = view.tag.toString()
                         when (buttonTag) {
                             //"recording" -> CellPreserveData(null, null, getVoiceDataFromButton(i), null)
-                            "location" -> CellPreserveData(null, null, null, view.text.toString())
-                            else -> CellPreserveData(null, null, getVoiceDataPathFromButton(i) , null)
+                            "location" -> CellPreserveData(null, null, null, view.text.toString(), null)
+                            else -> CellPreserveData(null, null, getVoiceDataPathFromButton(i) , null, null)
                         }
                     }
+                    is Space -> {
+                        CellPreserveData(null, null, null,null, "space")
+                    }
                     else -> {
-                        CellPreserveData(null, null, null,null)
+                        CellPreserveData(null, null, null,null, null)
                     }
                 }
             }
@@ -856,6 +873,16 @@ class JourneyActivity : AppCompatActivity() {
         }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun addSpace(hight: Int){
+        val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
+        val space = Space(this)
+        space.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            hight
+        )
+        layout.addView(space)
     }
 
 }
