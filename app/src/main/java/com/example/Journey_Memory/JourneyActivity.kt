@@ -30,6 +30,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -152,6 +153,9 @@ class JourneyActivity : AppCompatActivity() {
         val fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.anim)
         // 應用開場動畫到視圖
         layout.startAnimation(fadeInAnimation)
+
+        // 設定為白天模式
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         // 初始化 Places SDK
         val apiKey = getString(R.string.places_api_key)
@@ -507,6 +511,7 @@ class JourneyActivity : AppCompatActivity() {
             startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE)
         } catch (ex: IOException) {
             ex.printStackTrace()
+            soundPool.play(clickErrorId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             Toast.makeText(this, "無法創建圖片", Toast.LENGTH_SHORT).show()
         }
     }
@@ -685,7 +690,7 @@ class JourneyActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.auto_location -> {
                     // 自動定位
-                    val currentLocation = getUserLocation() // 获取用户位置信息
+                    val currentLocation = getUserLocation() // 獲取用戶當前位置
                     createLocationButton(currentLocation)
                     true
                 }
@@ -726,6 +731,7 @@ class JourneyActivity : AppCompatActivity() {
         // 顯示地圖
         locationButton.setOnClickListener {
             if (location == "無法獲取當前位置") {
+                soundPool.play(clickErrorId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
                 Toast.makeText(this, "無法獲取當前位置", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -749,16 +755,36 @@ class JourneyActivity : AppCompatActivity() {
         val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
         if (ContextCompat.checkSelfPermission(this, locationPermission) == PackageManager.PERMISSION_GRANTED) {
             val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            val locationProvider = LocationManager.GPS_PROVIDER
-            val location = locationManager.getLastKnownLocation(locationProvider)
-            if (location != null) {
-                val latitude = location.latitude
-                val longitude = location.longitude
-                return "($latitude, $longitude)"
+
+            // 網路定位
+            val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+            if (isNetworkEnabled) {
+                val locationProvider = LocationManager.NETWORK_PROVIDER
+                val location = locationManager.getLastKnownLocation(locationProvider)
+                if (location != null) {
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+                    return "($latitude, $longitude)"
+                }
+            }
+
+            // GPS定位
+            val isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            if (isGPSEnabled) {
+                val locationProvider = LocationManager.GPS_PROVIDER
+                val location = locationManager.getLastKnownLocation(locationProvider)
+                if (location != null) {
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+                    return "($latitude, $longitude)"
+                }
             }
         }
+
+        soundPool.play(clickErrorId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
         return "無法獲取當前位置"
     }
+
 
     private fun insertImageToDiaryByPath(imagePath: String) {
         val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)

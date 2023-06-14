@@ -11,6 +11,7 @@ import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.example.Journey_Memory.data.ItemRoomDatabase
 import kotlinx.coroutines.launch
@@ -29,6 +30,9 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide() // 隱藏標題欄
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // 設定為白天模式
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         var stDay: String
         var edDay: String
