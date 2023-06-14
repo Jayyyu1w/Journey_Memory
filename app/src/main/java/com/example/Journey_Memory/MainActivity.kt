@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         val editEdTime: EditText = findViewById(R.id.edit_eddate)
         val buttonStJourney: Button = findViewById(R.id.button_start)
         val buttonMemory: Button = findViewById(R.id.button_edit)
+        val buttonShare: Button = findViewById(R.id.button_share)
         val spinner: Spinner = findViewById(R.id.spinners)
         val opts: List<String?> = listOf("旅遊", "美食", "其他")
         val adapter: ArrayAdapter<*> =
@@ -124,6 +125,26 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+        buttonShare.setOnClickListener {
+            soundPool.play(clickSelctId, 1.0f, 1.0f, 1, 0, 1.0f) // 播放点击音效
+
+            // 创建分享文本
+            val shareText = """
+                我發現了一個很棒的app，快來下載吧！
+                
+                JoirneyMemory
+                一個可以記錄旅遊、美食、記事回憶的app
+                下载連結：
+                """.trimIndent()
+
+            // 创建分享意图
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.type = "text/plain"
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
+
+            // 启动分享操作
+            startActivity(Intent.createChooser(shareIntent, "分享此APP給好友"))
+        }
     }
     /**
      * 顯示選擇的日期
