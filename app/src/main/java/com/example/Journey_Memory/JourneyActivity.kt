@@ -386,25 +386,29 @@ class JourneyActivity : AppCompatActivity() {
         for (i in 0 until layout.childCount) {
             val itemData: CellPreserveData
             val view = layout.getChildAt(i)
-            itemData = when (view) {
-                is EditText -> {
-                    val text: String? = view.text.toString()
-                    CellPreserveData(text, null, null,null)
-                }
-                is ImageView -> {
-                    val imageData: String? = view.tag.toString()
-                    CellPreserveData(null, imageData, null,null)
-                }
-                is Button -> {
-                    val buttonTag: String? = view.tag.toString()
-                    when (buttonTag) {
-                        //"recording" -> CellPreserveData(null, null, getVoiceDataFromButton(i), null)
-                        "location" -> CellPreserveData(null, null, null, view.text.toString())
-                        else -> CellPreserveData(null, null, getVoiceDataPathFromButton(i) , null)
+            if(view is ImageButton){
+                itemData = CellPreserveData(null,null,getVoiceDataPathFromButton(i),null)
+            }else{
+                itemData = when (view) {
+                    is EditText -> {
+                        val text: String? = view.text.toString()
+                        CellPreserveData(text, null, null,null)
                     }
-                }
-                else -> {
-                    CellPreserveData(null, null, null,null)
+                    is ImageView -> {
+                        val imageData: String? = view.tag.toString()
+                        CellPreserveData(null, imageData, null,null)
+                    }
+                    is Button -> {
+                        val buttonTag: String? = view.tag.toString()
+                        when (buttonTag) {
+                            //"recording" -> CellPreserveData(null, null, getVoiceDataFromButton(i), null)
+                            "location" -> CellPreserveData(null, null, null, view.text.toString())
+                            else -> CellPreserveData(null, null, getVoiceDataPathFromButton(i) , null)
+                        }
+                    }
+                    else -> {
+                        CellPreserveData(null, null, null,null)
+                    }
                 }
             }
             itemDataList.add(itemData)
