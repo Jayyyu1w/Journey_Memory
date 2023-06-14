@@ -1,6 +1,6 @@
 package com.example.Journey_Memory.data
 
-data class CellPreserveData(val text: String?, val imageData: String?, val voiceData: String?,val locationData:String?) {
+data class CellPreserveData(val text: String?, val imageData: String?, val voiceData: String?,val locationData:String?,val spaceData:String?) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -11,6 +11,7 @@ data class CellPreserveData(val text: String?, val imageData: String?, val voice
         if (imageData != other.imageData) return false
         if (locationData != other.locationData) return false
         if (voiceData != other.voiceData) return false
+        if (spaceData != other.spaceData) return false
         /*if (imageData != null) {
             if (other.imageData == null) return false
             if (!imageData.contentEquals(other.imageData)) return false

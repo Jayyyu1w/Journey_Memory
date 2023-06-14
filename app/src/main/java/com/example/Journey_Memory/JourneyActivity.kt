@@ -30,6 +30,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -64,6 +65,7 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var voiceAdd: ImageView
     private lateinit var cameraAdd: ImageView
     private lateinit var locationAdd: ImageView
+    private lateinit var spaceAdd: ImageView
     private lateinit var layout: LinearLayout
     private lateinit var journalType: String
     private lateinit var journalDates: Array<String>
@@ -141,6 +143,7 @@ class JourneyActivity : AppCompatActivity() {
         voiceAdd = findViewById(R.id.voice_add)
         cameraAdd = findViewById(R.id.camera_add)
         locationAdd = findViewById(R.id.location_add)
+        spaceAdd = findViewById(R.id.space_add)
         layout = findViewById(R.id.JourneyMainLayout)
         journalType = intent.getStringExtra("journalType")!!
         journalDates = intent.getStringArrayExtra("journalDates")!!
@@ -152,6 +155,9 @@ class JourneyActivity : AppCompatActivity() {
         val fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.anim)
         // 應用開場動畫到視圖
         layout.startAnimation(fadeInAnimation)
+
+        // 設定為白天模式
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         // 初始化 Places SDK
         val apiKey = getString(R.string.places_api_key)
@@ -192,6 +198,7 @@ class JourneyActivity : AppCompatActivity() {
                         val imageData = cellPreserveData.imageData
                         val voiceData = cellPreserveData.voiceData
                         val locationData = cellPreserveData.locationData
+                        val spaceData = cellPreserveData.spaceData
                         Log.d("MemoryActivity", "Text: $text, Image Data: $imageData, Voice Data: $voiceData")
                         if(text!=null){
                             val editText = EditText(this)
@@ -221,6 +228,9 @@ class JourneyActivity : AppCompatActivity() {
                         }
                         if(locationData!=null){
                             createLocationButton(locationData.toString())
+                        }
+                        if(spaceData!=null){
+                            addSpace(100)
                         }
                     }
                 }
@@ -254,6 +264,7 @@ class JourneyActivity : AppCompatActivity() {
                 voiceAdd.visibility = View.VISIBLE
                 cameraAdd.visibility = View.VISIBLE
                 locationAdd.visibility = View.VISIBLE
+                spaceAdd.visibility = View.VISIBLE
 
                 // 執行動畫效果
                 animateVisibility(textAdd, View.VISIBLE)
@@ -261,6 +272,7 @@ class JourneyActivity : AppCompatActivity() {
                 animateVisibility(voiceAdd, View.VISIBLE)
                 animateVisibility(cameraAdd, View.VISIBLE)
                 animateVisibility(locationAdd, View.VISIBLE)
+                animateVisibility(spaceAdd, View.VISIBLE)
             }
 
             private fun collapseButtons() {
@@ -270,6 +282,7 @@ class JourneyActivity : AppCompatActivity() {
                 animateVisibility(voiceAdd, View.GONE)
                 animateVisibility(cameraAdd, View.GONE)
                 animateVisibility(locationAdd, View.GONE)
+                animateVisibility(spaceAdd, View.GONE)
             }
 
             private fun animateVisibility(view: View, visibility: Int) {
@@ -376,6 +389,11 @@ class JourneyActivity : AppCompatActivity() {
             }
         }
 
+        spaceAdd.setOnClickListener(View.OnClickListener {
+            soundPool.play(clickCoolId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+            addSpace(100)
+        })
+
 
     }
 
@@ -387,27 +405,30 @@ class JourneyActivity : AppCompatActivity() {
             val itemData: CellPreserveData
             val view = layout.getChildAt(i)
             if(view is ImageButton){
-                itemData = CellPreserveData(null,null,getVoiceDataPathFromButton(i),null)
+                itemData = CellPreserveData(null,null,getVoiceDataPathFromButton(i),null, null)
             }else{
                 itemData = when (view) {
                     is EditText -> {
                         val text: String? = view.text.toString()
-                        CellPreserveData(text, null, null,null)
+                        CellPreserveData(text, null, null,null, null)
                     }
                     is ImageView -> {
                         val imageData: String? = view.tag.toString()
-                        CellPreserveData(null, imageData, null,null)
+                        CellPreserveData(null, imageData, null,null, null)
                     }
                     is Button -> {
                         val buttonTag: String? = view.tag.toString()
                         when (buttonTag) {
                             //"recording" -> CellPreserveData(null, null, getVoiceDataFromButton(i), null)
-                            "location" -> CellPreserveData(null, null, null, view.text.toString())
-                            else -> CellPreserveData(null, null, getVoiceDataPathFromButton(i) , null)
+                            "location" -> CellPreserveData(null, null, null, view.text.toString(), null)
+                            else -> CellPreserveData(null, null, getVoiceDataPathFromButton(i) , null, null)
                         }
                     }
+                    is Space -> {
+                        CellPreserveData(null, null, null,null, "space")
+                    }
                     else -> {
-                        CellPreserveData(null, null, null,null)
+                        CellPreserveData(null, null, null,null, null)
                     }
                 }
             }
@@ -507,6 +528,7 @@ class JourneyActivity : AppCompatActivity() {
             startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE)
         } catch (ex: IOException) {
             ex.printStackTrace()
+            soundPool.play(clickErrorId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
             Toast.makeText(this, "無法創建圖片", Toast.LENGTH_SHORT).show()
         }
     }
@@ -677,6 +699,7 @@ class JourneyActivity : AppCompatActivity() {
         layout.addView(imageView)
     }
 
+    // 定位相關功能
     private fun showLocationPopup() {
         val popupMenu = PopupMenu(this, locationAdd)
         popupMenu.menuInflater.inflate(R.menu.location_menu, popupMenu.menu)
@@ -685,7 +708,7 @@ class JourneyActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.auto_location -> {
                     // 自動定位
-                    val currentLocation = getUserLocation() // 获取用户位置信息
+                    val currentLocation = getUserLocation() // 獲取用戶當前位置
                     createLocationButton(currentLocation)
                     true
                 }
@@ -726,6 +749,7 @@ class JourneyActivity : AppCompatActivity() {
         // 顯示地圖
         locationButton.setOnClickListener {
             if (location == "無法獲取當前位置") {
+                soundPool.play(clickErrorId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
                 Toast.makeText(this, "無法獲取當前位置", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -749,28 +773,56 @@ class JourneyActivity : AppCompatActivity() {
         val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
         if (ContextCompat.checkSelfPermission(this, locationPermission) == PackageManager.PERMISSION_GRANTED) {
             val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            val locationProvider = LocationManager.GPS_PROVIDER
-            val location = locationManager.getLastKnownLocation(locationProvider)
-            if (location != null) {
-                val latitude = location.latitude
-                val longitude = location.longitude
-                return "($latitude, $longitude)"
+
+            // 網路定位
+            val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+            if (isNetworkEnabled) {
+                val locationProvider = LocationManager.NETWORK_PROVIDER
+                val location = locationManager.getLastKnownLocation(locationProvider)
+                if (location != null) {
+                    soundPool.play(clickSelctId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+                    return "($latitude, $longitude)"
+                }
+            }
+
+            // GPS定位
+            val isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            if (isGPSEnabled) {
+                val locationProvider = LocationManager.GPS_PROVIDER
+                val location = locationManager.getLastKnownLocation(locationProvider)
+                if (location != null) {
+                    soundPool.play(clickSelctId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+                    return "($latitude, $longitude)"
+                }
             }
         }
+
+        soundPool.play(clickErrorId, 1.0f, 1.0f, 1, 0, 1.0f) // 音效
         return "無法獲取當前位置"
     }
+
 
     private fun insertImageToDiaryByPath(imagePath: String) {
         val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
         val imageView = ImageView(this)
-        imageView.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
+
+        // 設置圖片的縮放類型
+        imageView.scaleType = ImageView.ScaleType.FIT_XY
+
+        // 使用手機的寬度作為圖片的寬度
+        val screenWidth = resources.displayMetrics.widthPixels
+        val bitmap = BitmapFactory.decodeFile(imagePath)
+        val scaledHeight = (bitmap.height.toFloat() / bitmap.width.toFloat() * screenWidth).toInt()
+
+        // 設置圖片的寬高
+        val layoutParams = LinearLayout.LayoutParams(screenWidth, scaledHeight)
+        imageView.layoutParams = layoutParams
         imageView.tag = imagePath
 
-        // 通过文件路徑創建 Bitmap 对象
-        val bitmap = BitmapFactory.decodeFile(imagePath)
         imageView.setImageBitmap(bitmap)
         imageView.setOnLongClickListener {
             showConfirmationDialog("確認刪除", "您確定要刪除該圖片嗎？") {
@@ -780,6 +832,7 @@ class JourneyActivity : AppCompatActivity() {
         }
         layout.addView(imageView)
     }
+
     // 取得圖片在相簿的路徑
     private fun getImagePathFromUri(uri: Uri): String? {
         var imagePath: String? = null
@@ -820,6 +873,16 @@ class JourneyActivity : AppCompatActivity() {
         }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun addSpace(hight: Int){
+        val layout = findViewById<LinearLayout>(R.id.JourneyMainLayout)
+        val space = Space(this)
+        space.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            hight
+        )
+        layout.addView(space)
     }
 
 }

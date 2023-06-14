@@ -11,6 +11,7 @@ import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.example.Journey_Memory.data.ItemRoomDatabase
 import kotlinx.coroutines.launch
@@ -30,6 +31,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // 設定為白天模式
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
         var stDay: String
         var edDay: String
         val buttonStTime: Button = findViewById(R.id.button_stdate)
@@ -38,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         val editEdTime: EditText = findViewById(R.id.edit_eddate)
         val buttonStJourney: Button = findViewById(R.id.button_start)
         val buttonMemory: Button = findViewById(R.id.button_edit)
+        val buttonShare: Button = findViewById(R.id.button_share)
         val spinner: Spinner = findViewById(R.id.spinners)
         val opts: List<String?> = listOf("旅遊", "美食", "其他")
         val adapter: ArrayAdapter<*> =
@@ -120,6 +125,26 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+        buttonShare.setOnClickListener {
+            soundPool.play(clickSelctId, 1.0f, 1.0f, 1, 0, 1.0f) // 播放点击音效
+
+            // 分享的文本
+            val shareText = """
+                我發現了一個很棒的app，快來下載吧！
+                
+                JoirneyMemory
+                一個可以記錄旅遊、美食、記事回憶的app
+                下载連結：https://raw.githubusercontent.com/Jayyyu1w/Journey_Memory/main/JourneyMemory.apk
+                """.trimIndent()
+
+            // 創建分享
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.type = "text/plain"
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
+
+            // 開啟分享
+            startActivity(Intent.createChooser(shareIntent, "分享此APP給好友"))
+        }
     }
     /**
      * 顯示選擇的日期
