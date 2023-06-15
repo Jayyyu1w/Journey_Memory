@@ -57,6 +57,7 @@ import java.util.*
 class JourneyActivity : AppCompatActivity() {
 
     private lateinit var titles: TextView
+    private lateinit var titleName: TextView
     private lateinit var dates: TextView
     private lateinit var saveBtn: ImageView
     private lateinit var addBtn: ImageView
@@ -68,6 +69,7 @@ class JourneyActivity : AppCompatActivity() {
     private lateinit var spaceAdd: ImageView
     private lateinit var layout: LinearLayout
     private lateinit var journalType: String
+    private lateinit var journalTitle: String
     private lateinit var journalDates: Array<String>
     private lateinit var journalID: String
     private lateinit var database: ItemRoomDatabase
@@ -135,6 +137,7 @@ class JourneyActivity : AppCompatActivity() {
         setContentView(R.layout.activity_journey)
 
         titles = findViewById(R.id.journeyTp)
+        titleName = findViewById(R.id.journeyTi)
         dates = findViewById(R.id.journeyDt)
         saveBtn = findViewById(R.id.checkmark_icon)
         addBtn = findViewById(R.id.add_icon)
@@ -146,6 +149,7 @@ class JourneyActivity : AppCompatActivity() {
         spaceAdd = findViewById(R.id.space_add)
         layout = findViewById(R.id.JourneyMainLayout)
         journalType = intent.getStringExtra("journalType")!!
+        journalTitle = intent.getStringExtra("journalTitle")!!
         journalDates = intent.getStringArrayExtra("journalDates")!!
         journalID = intent.getStringExtra("journalID")!!
         database = ItemRoomDatabase.getDatabase(this)
@@ -237,10 +241,11 @@ class JourneyActivity : AppCompatActivity() {
             })
         }
         titles.text = journalType
+        titleName.text = journalTitle
         dates.text = "${journalDates[0]} ~ ${journalDates[1]}"
 
         saveBtn.setOnClickListener {
-            saveDiary(journalDates, journalType, diaryDao)
+            saveDiary(journalDates, journalType, journalTitle, diaryDao)
         }
 
         var extVisCnt = 0
@@ -398,7 +403,7 @@ class JourneyActivity : AppCompatActivity() {
     }
 
     // 資料庫存取
-    private fun saveDiary(journalDates: Array<String>, journalType: String, diaryDao: ItemDao) {
+    private fun saveDiary(journalDates: Array<String>, journalType: String, journalTitle: String, diaryDao: ItemDao) {
         val itemDataList = ArrayList<CellPreserveData>()
 
         for (i in 0 until layout.childCount) {
@@ -441,9 +446,9 @@ class JourneyActivity : AppCompatActivity() {
                 journalID.toLong(), // 使用journalID来更新特定的項目
                 journalDates[0],
                 journalDates[1],
-                titles.text.toString(),
+                journalType,
                 itemDataList,
-                journalType
+                journalTitle
             )
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) {
@@ -459,9 +464,9 @@ class JourneyActivity : AppCompatActivity() {
                 0,
                 journalDates[0],
                 journalDates[1],
-                titles.text.toString(),
+                journalType,
                 itemDataList,
-                journalType
+                journalTitle
             )
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) {

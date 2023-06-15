@@ -141,6 +141,7 @@ class DiaryAdapter : RecyclerView.Adapter<DiaryViewHolder>() {
             val journalDates = arrayOf(data.startDate, data.endDate)
             intent.putExtra("journalDates", journalDates)
             intent.putExtra("journalID",data.id.toString())
+            intent.putExtra("journalTitle", data.tags.toString())
             holder.itemView.context.startActivity(intent)
         }
     }

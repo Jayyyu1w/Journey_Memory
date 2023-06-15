@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         val editStTime: EditText = findViewById(R.id.edit_stdate)
         val buttonEdTime: Button = findViewById(R.id.button_eddate)
         val editEdTime: EditText = findViewById(R.id.edit_eddate)
+        val editTitle: EditText = findViewById(R.id.title_name)
         val buttonStJourney: Button = findViewById(R.id.button_start)
         val buttonMemory: Button = findViewById(R.id.button_edit)
         val buttonShare: Button = findViewById(R.id.button_share)
@@ -113,6 +114,10 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra("journalDates", journalDates)
                 val id = "null"
                 intent.putExtra("journalID",id)
+                var name=editTitle.text.toString()
+                if(name.isEmpty())
+                    name=spinner.selectedItem.toString()
+                intent.putExtra("journalTitle",name)
                 journeyActivityResultLauncher.launch(intent)
                 lifecycleScope.launch {
                     // 在需要確認資料庫內容的地方（例如 MainActivity），使用 observe 方法觀察 LiveData

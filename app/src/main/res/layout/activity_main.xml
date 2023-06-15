@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:text="@string/app_subtitle"
             android:textSize="50sp"
-            android:layout_marginBottom="100dp"
+            android:layout_marginBottom="40dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -28,8 +28,20 @@
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:paddingTop="17dp"
+            android:layout_marginBottom="40dp"
             android:paddingBottom="17dp"
             android:background="@drawable/border_spinner" />
+
+        <EditText
+            android:id="@+id/title_name"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ems="18"
+            android:inputType="text"
+            android:maxLength="20"
+            android:hint="@string/title_hint"
+            android:minHeight="48dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
