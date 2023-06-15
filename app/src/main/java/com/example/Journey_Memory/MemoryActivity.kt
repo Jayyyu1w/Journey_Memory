@@ -12,13 +12,17 @@ import android.view.animation.AnimationUtils
 import android.widget.CalendarView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.Journey_Memory.data.Item
+import com.example.Journey_Memory.data.ItemDao
 import com.example.Journey_Memory.data.ItemRoomDatabase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.reflect.typeOf
@@ -29,14 +33,13 @@ class MemoryActivity : AppCompatActivity() {
         supportActionBar?.hide() // 隱藏標題欄
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memory)
-
-        val recyclerView = findViewById<RecyclerView>(R.id.diary_list)
-        recyclerView.layoutManager = LinearLayoutManager(this) // 設置布局管理器，例如 LinearLayoutManager
-        val adapter = DiaryAdapter() // 建立adapter instance
-        recyclerView.adapter = adapter // 設置adapter
         // 使用 Room 建立資料庫
         val database: ItemRoomDatabase by lazy { ItemRoomDatabase.getDatabase(this) }
         val diaryDao = database.itemDao()
+        val recyclerView = findViewById<RecyclerView>(R.id.diary_list)
+        recyclerView.layoutManager = LinearLayoutManager(this) // 設置布局管理器，例如 LinearLayoutManager
+        val adapter = DiaryAdapter(diaryDao,lifecycleScope) // 建立adapter instance
+        recyclerView.adapter = adapter // 設置adapter
         val calendarView = findViewById<CalendarView>(R.id.calendarView)
 
         // 取得日曆的動畫
@@ -106,7 +109,7 @@ class DiaryViewHolder : RecyclerView.ViewHolder{
     }
 }
 
-class DiaryAdapter : RecyclerView.Adapter<DiaryViewHolder>() {
+class DiaryAdapter(private val diaryDao: ItemDao,private val lifecycleScope: LifecycleCoroutineScope) : RecyclerView.Adapter<DiaryViewHolder>() {
 
     private val dataList = mutableListOf<Item>()
     // 建立 ViewHolder
@@ -143,6 +146,27 @@ class DiaryAdapter : RecyclerView.Adapter<DiaryViewHolder>() {
             intent.putExtra("journalID",data.id.toString())
             intent.putExtra("journalTitle", data.tags.toString())
             holder.itemView.context.startActivity(intent)
+        }
+        holder.itemView.setOnLongClickListener {
+            if (position != RecyclerView.NO_POSITION) {
+                val itemToDelete = dataList[position]
+                AlertDialog.Builder(holder.itemView.context)
+                    .setTitle("刪除?")
+                    .setMessage("您確認要刪除該日記嗎?\n(刪除後即無法恢復)")
+                    .setPositiveButton("確定") { dialog, _ ->
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            diaryDao.deleteItem(itemToDelete)
+                        }
+                        dataList.removeAt(position)
+                        notifyItemRemoved(position)
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("取消") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
+            true
         }
     }
 
