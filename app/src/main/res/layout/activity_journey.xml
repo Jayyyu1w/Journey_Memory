@@ -18,7 +18,7 @@
                 android:layout_height="wrap_content"
                 android:background="#FF66C4"
                 android:orientation="horizontal"
-                android:paddingTop="30dp">
+                android:paddingTop="10dp">
 
                 <TextView
                     android:id="@+id/journeyTp"
@@ -55,8 +55,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginBottom="5dp"
                     android:text="測試"
-                    android:textColor="#FF6200EE"
+                    android:textColor="@android:color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 

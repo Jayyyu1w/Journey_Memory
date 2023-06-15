@@ -56,7 +56,7 @@ import java.util.*
 
 class JourneyActivity : AppCompatActivity() {
 
-    private lateinit var titles: TextView
+    private lateinit var types: TextView
     private lateinit var titleName: TextView
     private lateinit var dates: TextView
     private lateinit var saveBtn: ImageView
@@ -136,7 +136,7 @@ class JourneyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_journey)
 
-        titles = findViewById(R.id.journeyTp)
+        types = findViewById(R.id.journeyTp)
         titleName = findViewById(R.id.journeyTi)
         dates = findViewById(R.id.journeyDt)
         saveBtn = findViewById(R.id.checkmark_icon)
@@ -240,9 +240,35 @@ class JourneyActivity : AppCompatActivity() {
                 }
             })
         }
-        titles.text = journalType
+        types.text = journalType
         titleName.text = journalTitle
         dates.text = "${journalDates[0]} ~ ${journalDates[1]}"
+
+        titleName.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("編輯標題")
+
+            // 創建一個 EditText 供使用者輸入編輯的文字
+            val input = EditText(this)
+            builder.setView(input)
+
+            // 設置確認按鈕
+            builder.setPositiveButton("確認") { dialog, which ->
+                // 獲取使用者輸入的文字並設定給 TextView
+                val editedText = input.text.toString()
+                titleName.text = editedText
+                journalTitle = editedText
+            }
+
+            // 設置取消按鈕
+            builder.setNegativeButton("取消") { dialog, which ->
+                dialog.cancel()
+            }
+
+            // 建立對話框並顯示
+            val dialog = builder.create()
+            dialog.show()
+        }
 
         saveBtn.setOnClickListener {
             saveDiary(journalDates, journalType, journalTitle, diaryDao)
