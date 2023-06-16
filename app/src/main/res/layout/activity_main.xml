@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/white"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -68,6 +69,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/stdate"
+                    android:backgroundTint="@color/blue2"
                     android:textSize="18sp"
                  />
 
@@ -93,6 +95,7 @@
                     android:id="@+id/button_eddate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="@color/blue2"
                     android:text="@string/eddate"
                     android:textSize="18sp"
                     />
@@ -108,6 +111,7 @@
             android:layout_marginTop="50dp"
             android:textStyle="bold"
             android:textSize="26sp"
+            android:backgroundTint="@color/blue2"
             />
 
         <Button
@@ -118,6 +122,7 @@
             android:text="@string/edit_diary"
             android:textStyle="bold"
             android:textSize="26sp"
+            android:backgroundTint="@color/blue2"
             />
 
         <Button
@@ -128,6 +133,7 @@
             android:text="@string/share"
             android:textStyle="bold"
             android:textSize="26sp"
+            android:backgroundTint="@color/blue2"
             />
     </LinearLayout>
 
