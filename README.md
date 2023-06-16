@@ -93,7 +93,11 @@ Journey App
 
 ## Android Final Project
 This is our Android final project, a travel journal app.
-Current features: Ability to select journal categories, ability to add images or text in cell format(jupyter notebook alike).
-Planned features: saving functionality, categorization feature, destination weather forecast.
+
+You can select a journal category, edit the journal title, and create your own journal during a specific period of time!
+
+In the journal, you can add images, text, locations, recordings, etc., in the form of cells (similar to Jupyter Notebook).
+
+You can view and modify your journal anytime!
 
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/test.png?raw=true" alt="test" width="300">
