@@ -38,17 +38,12 @@
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/main_page.png?raw=true" alt="test" width="200">
 
 
-點擊第一個畫面框，可以選擇您要的"日誌類別"(旅遊、美食、其他)
-
-點擊第二個欄位並輸入您的"日誌標題"
-
-點選"開始日期"與"結束日期"按鈕直接選擇您想創建的日誌適用時間(開始旅程前必填欄位)
-
-填選完畢即可點擊"開始旅程"即可開始編輯您的日誌
-
-若點選"旅程回憶"即可回顧您所創建的日誌
-
-若點選"分享"即可和好友分享我們的App
+點擊第一個畫面框，可以選擇您要的"日誌類別"(旅遊、美食、其他)<br>
+點擊第二個欄位並輸入您的"日誌標題"<br>
+點選"開始日期"與"結束日期"按鈕直接選擇您想創建的日誌適用時間(開始旅程前必填欄位)<br>
+填選完畢即可點擊"開始旅程"即可開始編輯您的日誌<br>
+若點選"旅程回憶"即可回顧您所創建的日誌<br>
+若點選"分享"即可和好友分享我們的App<br>
 
 ### 開始旅程頁說明
 進入"開始旅程"創建您的旅程
@@ -57,33 +52,25 @@
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/edit_page.png?raw=true" alt="test" width="200">
 
 
-點選右下"+"圖示可展開選擇您想要加入日誌的種類
-
-點選右下"打勾"圖示可儲存您的日誌
-
-點擊您的日誌標題可進行標題更改
-
-長按您加入的任何日誌元素都可以進行刪除
+點選右下"+"圖示可展開選擇您想要加入日誌的種類<br>
+點選右下"打勾"圖示可儲存您的日誌<br>
+點擊您的日誌標題可進行標題更改<br>
+長按您加入的任何日誌元素都可以進行刪除<br>
 
 #### 地圖功能
 
-點擊"地圖圖示"可選擇"手動"或"自動"加入地點名稱或座標
-
+點擊"地圖圖示"可選擇"手動"或"自動"加入地點名稱或座標<br>
 + 手動：輸入地標名稱，並點擊"確定"即可加入地點名稱
 + 自動：自動加入您當前位置的經緯度
 
-點擊"地點名稱或座標"，將自動打開Google Map並查看此位置的地圖資訊
-
-實作細節是透過 Place API 取得地點資訊，並以 Google Map API 顯示地圖
+點擊"地點名稱或座標"，將自動打開Google Map並查看此位置的地圖資訊<br>
+實作細節是透過 Place API 取得地點資訊，並以 Google Map API 顯示地圖<br>
 
 #### 錄音功能
-點擊"錄音圖示"可以創建錄音
-
-點擊第一下出現的"錄音按鈕"即可進行錄音
-
-點擊第二下可以停止錄音
-
-之後再點擊即可撥放錄音
+點擊"錄音圖示"可以創建錄音<br>
+點擊第一下出現的"錄音按鈕"即可進行錄音<br>
+點擊第二下可以停止錄音<br>
+之後再點擊即可撥放錄音<br>
 
 #### 文字功能
 點擊"文字圖示"可以創建可輸入文字的文字框，並輸入您想要的文字
@@ -104,11 +91,9 @@
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/memory_page.png?raw=true" alt="test" width="200">
 
 
-點擊日誌中出現的日曆並選擇日期，可查看您在那段時間所創建的日誌
-
-點擊出現的日誌可以查看並編輯您的日誌內容
-
-長按日誌可以永久刪除日誌
+點擊日誌中出現的日曆並選擇日期，可查看您在那段時間所創建的日誌<br>
+點擊出現的日誌可以查看並編輯您的日誌內容<br>
+長按日誌可以永久刪除日誌<br>
 
 ### 分享頁說明
 進入"分享"將我們的App分享給所有人知道!
@@ -118,12 +103,9 @@
 
 
 ## Android Final Project
-This is our Android final project, a travel journal app.
-
-You can select a journal category, edit the journal title, and create your own journal during a specific period of time!
-
-In the journal, you can add images, text, locations, recordings, etc., in the form of cells (similar to Jupyter Notebook).
-
-You can view and modify your journal anytime!
+This is our Android final project, a travel journal app.<br>
+You can select a journal category, edit the journal title, and create your own journal during a specific period of time!<br>
+In the journal, you can add images, text, locations, recordings, etc., in the form of cells (similar to Jupyter Notebook).<br>
+You can view and modify your journal anytime!<br>
 
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/test.png?raw=true" alt="test" width="300">
