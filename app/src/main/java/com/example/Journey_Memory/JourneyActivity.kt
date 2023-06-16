@@ -214,6 +214,7 @@ class JourneyActivity : AppCompatActivity() {
                             val editableText = Editable.Factory.getInstance().newEditable(text)
                             editText.text = editableText
                             editText.setOnLongClickListener {
+                                soundPool.play(clickErrorId, 1.0f, 1.0f, 0, 0, 1.0f)
                                 showConfirmationDialog("確認刪除", "您確定要刪除該文字嗎？") {
                                     layout.removeView(editText)
                                 }
@@ -372,6 +373,7 @@ class JourneyActivity : AppCompatActivity() {
             editText.layoutParams = layoutParams
             editText.hint = "請在這裡輸入文字"
             editText.setOnLongClickListener {
+                soundPool.play(clickErrorId, 1.0f, 1.0f, 0, 0, 1.0f)
                 showConfirmationDialog("確認刪除", "您確定要刪除該文字嗎？") {
                     layout.removeView(editText)
                 }
@@ -636,6 +638,7 @@ class JourneyActivity : AppCompatActivity() {
             recordingButton.setImageResource(R.drawable.play)
         }
         recordingButton.setOnLongClickListener {
+            soundPool.play(clickErrorId, 1.0f, 1.0f, 0, 0, 1.0f)
             showConfirmationDialog("確認刪除", "您確定要刪除該錄音嗎？") {
                 layout.removeView(recordingButton)
             }
@@ -769,6 +772,7 @@ class JourneyActivity : AppCompatActivity() {
         )
         locationButton.text = location
         locationButton.setOnLongClickListener {
+            soundPool.play(clickErrorId, 1.0f, 1.0f, 0, 0, 1.0f)
             showConfirmationDialog("確認刪除", "您確定要刪除該位置嗎？") {
                 layout.removeView(locationButton)
             }
@@ -856,6 +860,7 @@ class JourneyActivity : AppCompatActivity() {
 
         imageView.setImageBitmap(bitmap)
         imageView.setOnLongClickListener {
+            soundPool.play(clickErrorId, 1.0f, 1.0f, 0, 0, 1.0f)
             showConfirmationDialog("確認刪除", "您確定要刪除該圖片嗎？") {
                 layout.removeView(imageView)
             }
