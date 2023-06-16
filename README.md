@@ -1,32 +1,19 @@
 # Journey_Memory
+Journey App
 
 ## 旅遊日誌簡介
-這是我們的Android期末專案，是一個旅遊日誌<br>
-可以選擇日誌類別，編輯日誌標題，在某段時間創建屬於您的日誌!<br>
-日誌中可以以cell形式加入圖片、文字、地點、錄音等(像是jupyter notebook)<br>
+這是我們的Android期末專案，是一個旅遊日誌
+
+可以選擇日誌類別，編輯日誌標題，在某段時間創建屬於您的日誌!
+
+日誌中可以以cell形式加入圖片、文字、地點、錄音等(像是jupyter notebook)
+
 您隨時都可以查看您的日誌並進行修改!
 
-## 使用說明
-
-### a. 使用環境
-
-+ 基本需求：
-    + Android Studio Electric Eel | 2022.1.1 Patch 2
-    + Android SDK 30
-    + Android 11
-
-+ 建議環境：
-    + Android Studio Electric Eel | 2022.1.1 Patch 2
-    + Android SDK 33
-    + Android 12
-
-### b. 使用方式
-
-+ 透過 android studio 開啟專案，並透過模擬器或是實體手機執行
-+ 以 android 手機或模擬器下載 [JourneyMemory.apk](https://raw.githubusercontent.com/Jayyyu1w/Journey_Memory/main/JourneyMemory.apk) 並安裝
-
-
 ## 功能說明
+
+!!建議開啟聲音以獲得更好的使用體驗!!
+
 
 ### 主頁說明
 首先進入"旅遊日誌"可以看到主頁面
@@ -63,15 +50,9 @@
 長按您加入的任何日誌元素都可以進行刪除
 
 #### 地圖功能
+點擊"地圖圖示"可選擇"手動"或"自動"加入地點座標
 
-點擊"地圖圖示"可選擇"手動"或"自動"加入地點名稱或座標
-
-+ 手動：輸入地標名稱，並點擊"確定"即可加入地點名稱
-+ 自動：自動加入您當前位置的經緯度
-
-點擊"地點名稱或座標"，將自動打開Google Map並查看此位置的地圖資訊
-
-實作細節是透過 Place API 取得地點資訊，並以 Google Map API 顯示地圖
+點擊出現的"座標"可以自動打開Google Map並查看座標地點
 
 #### 錄音功能
 點擊"錄音圖示"可以創建錄音
