@@ -48,9 +48,6 @@ class MemoryActivity : AppCompatActivity() {
         calendarView.startAnimation(fadeInAnimation)
         recyclerView.startAnimation(fadeInAnimation)
 
-        // 請先選擇日期
-        Toast.makeText(this, "請先選擇日期", Toast.LENGTH_SHORT).show()
-
         // 取得當前日期
         val currentDate = getCurrentDate()
 
