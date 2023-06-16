@@ -1,8 +1,10 @@
 package com.example.Journey_Memory
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
+import android.media.SoundPool
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +14,8 @@ import android.view.animation.AnimationUtils
 import android.widget.CalendarView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleCoroutineScope
@@ -27,9 +31,13 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.reflect.typeOf
 
-
 class MemoryActivity : AppCompatActivity() {
+    private lateinit var journeyActivityResultLauncher: ActivityResultLauncher<Intent>
+    private var clickGameId: Int = 0
+    private lateinit var soundPool: SoundPool
     override fun onCreate(savedInstanceState: Bundle?) {
+        soundPool = SoundPool.Builder().setMaxStreams(1).build()
+        clickGameId = soundPool.load(this, R.raw.click_game, 1)
         supportActionBar?.hide() // 隱藏標題欄
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memory)
@@ -38,7 +46,14 @@ class MemoryActivity : AppCompatActivity() {
         val diaryDao = database.itemDao()
         val recyclerView = findViewById<RecyclerView>(R.id.diary_list)
         recyclerView.layoutManager = LinearLayoutManager(this) // 設置布局管理器，例如 LinearLayoutManager
-        val adapter = DiaryAdapter(diaryDao,lifecycleScope) // 建立adapter instance
+        journeyActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                soundPool.play(clickGameId, 1.0f, 1.0f, 1, 0, 1.0f) // 成功音效
+                // 儲存成功的處理邏輯，顯示儲存成功的提示
+                Toast.makeText(this, "儲存成功", Toast.LENGTH_SHORT).show()
+            }
+        }
+        val adapter = DiaryAdapter(diaryDao,lifecycleScope,journeyActivityResultLauncher) // 建立adapter instance
         recyclerView.adapter = adapter // 設置adapter
         val calendarView = findViewById<CalendarView>(R.id.calendarView)
 
@@ -84,6 +99,7 @@ class MemoryActivity : AppCompatActivity() {
                     })
             }
         }
+
     }
     private fun getCurrentDate(): String {
         val currentDate = Date()
@@ -106,8 +122,7 @@ class DiaryViewHolder : RecyclerView.ViewHolder{
     }
 }
 
-class DiaryAdapter(private val diaryDao: ItemDao,private val lifecycleScope: LifecycleCoroutineScope) : RecyclerView.Adapter<DiaryViewHolder>() {
-
+class DiaryAdapter(private val diaryDao: ItemDao,private val lifecycleScope: LifecycleCoroutineScope,private val journeyActivityResultLauncher: ActivityResultLauncher<Intent>) : RecyclerView.Adapter<DiaryViewHolder>() {
     private val dataList = mutableListOf<Item>()
     // 建立 ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DiaryViewHolder {
@@ -142,7 +157,7 @@ class DiaryAdapter(private val diaryDao: ItemDao,private val lifecycleScope: Lif
             intent.putExtra("journalDates", journalDates)
             intent.putExtra("journalID",data.id.toString())
             intent.putExtra("journalTitle", data.tags.toString())
-            holder.itemView.context.startActivity(intent)
+            journeyActivityResultLauncher.launch(intent)
         }
         holder.itemView.setOnLongClickListener {
             if (position != RecyclerView.NO_POSITION) {
