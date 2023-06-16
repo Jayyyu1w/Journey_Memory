@@ -10,6 +10,8 @@ Journey App
 ## 功能說明
 ### 主頁說明
 首先進入"旅遊日誌"可以看到主頁面
+
+
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/main_page.png?raw=true" alt="test" width="200">
 
 
@@ -22,6 +24,8 @@ Journey App
 
 ### 開始旅程頁說明
 進入"開始旅程"創建您的旅程
+
+
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/edit_page.png?raw=true" alt="test" width="200">
 
 
@@ -54,6 +58,8 @@ Journey App
 
 ### 旅程回憶頁說明
 進入"旅程回憶"回顧您的的旅程
+
+
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/memory_page.png?raw=true" alt="test" width="200">
 
 
@@ -63,6 +69,8 @@ Journey App
 
 ### 分享頁說明
 進入"分享"將我們的App分享給所有人知道!
+
+
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/share_page.png?raw=true" alt="test" width="200">
 
 
