@@ -28,8 +28,7 @@
 
 ## 功能說明
 
-!!建議開啟聲音以獲得更好的使用體驗!!
-
+**<font color="red">!!建議開啟聲音以獲得更好的使用體驗!!</font>**
 
 ### 主頁說明
 首先進入"旅遊日誌"可以看到主頁面
@@ -101,6 +100,22 @@
 
 <img src="https://github.com/Jayyyu1w/Journey_Memory/blob/main/src/share_page.png?raw=true" alt="test" width="200">
 
+### 其他說明
+
++ 音效：
+    + 儲存成功音效
+    + 失敗音效
+    + 選擇音效
+    + 多種點擊音效
++ 動畫：
+    + 頁面轉換皆插入淡入動畫
+    + 點擊 "+" 號按鈕，其他按鈕會以淡入與縮放動畫展開
+
+## 技術細節
+
+### API
+
+### 資料庫
 
 ## Android Final Project
 This is our Android final project, a travel journal app.<br>
